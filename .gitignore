@@ -1,0 +1,26 @@
+#:gitignore for crawler
+
+# IDE support files
+/.classpath
+/.launch
+/.project
+/.settings
+/*.launch
+/*.tmproj
+/eclipse
+
+# Yahoo! appid file
+*crawler.properties
+
+# test files
+#/src/test
+
+# reports files
+/reports
+/results
+# logs
+
+# "temporary" build files
+/target
+
+# other
