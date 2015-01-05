@@ -69,7 +69,7 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		//Binary_wholeSpace crawler=new Binary_wholeSpace();
 		//PeripheryQuery crawler=new PeripheryQuery();
 		//Periphery_Optimize crawler=new Periphery_Optimize();
-		Hexagon_optimize crawler=new Hexagon_optimize();
+		//Hexagon_optimize crawler=new Hexagon_optimize(new Coordinate(-77,43));
 		String state = "NY";
 		int categoryID = 96926236;
 		String category = "Restaurants";
@@ -77,7 +77,7 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		Coordinate startPoint=new Coordinate();
 		startPoint.x=(envelopeECEF.getMinX()+envelopeECEF.getMaxX())/2;
 		startPoint.y=(envelopeECEF.getMinY()+envelopeECEF.getMaxY())/2;
-		//Hexagon_optimize crawler=new Hexagon_optimize(startPoint);
+		Hexagon_optimize crawler=new Hexagon_optimize();
 		//
 		String testSource = "../crawler-data/yahoolocal-h2/test/source";
 		String testTarget = "../crawler-data/yahoolocal-h2/test/target";
@@ -133,17 +133,17 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 			logger.debug(id);
 		}
 
-		logger.info("poisCrawledTimes:");
-		Iterator it1 = Strategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
-		while (it1.hasNext()) {
-			Entry entry = (Entry) it1.next();
-			int poiID = (Integer) entry.getKey();
-			int times = (Integer) entry.getValue();
-			APOI aPOI = Strategy.dbInMemory.pois.get(poiID);
-			double longitude = aPOI.getCoordinate().x;
-			double latitude = aPOI.getCoordinate().y;
-			logger.info(poiID + ": " + times + ", " + "[" + longitude + ", " + latitude + "]");
-		}
+		//logger.info("poisCrawledTimes:");
+		//Iterator it1 = Strategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
+		//while (it1.hasNext()) {
+		//	Entry entry = (Entry) it1.next();
+			//int poiID = (Integer) entry.getKey();
+			//int times = (Integer) entry.getValue();
+			//APOI aPOI = Strategy.dbInMemory.pois.get(poiID);
+			//double longitude = aPOI.getCoordinate().x;
+			//double latitude = aPOI.getCoordinate().y;
+			//logger.info(poiID + ": " + times + ", " + "[" + longitude + ", " + latitude + "]");
+	//	}
 	}
 
 	/**

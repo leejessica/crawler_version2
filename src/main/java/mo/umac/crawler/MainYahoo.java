@@ -2,6 +2,8 @@ package mo.umac.crawler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 import mo.umac.db.DBInMemory;
 import mo.umac.metadata.APOI;
@@ -77,32 +79,30 @@ public class MainYahoo {
 		initForServer(false);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		shutdownLogs(MainYahoo.debug);
-		/************************* Crawling Algorithm ***************************/
-		// // Strategy crawlerStrategy = new AlgoSlice();
-		// Strategy crawlerStrategy = new AlgoProjection();
-		// Strategy crawlerStrategy = new AlgoPartition();
-		// AlgoPartition.clusterRegionFile = USDensity.clusterRegionFile;
-		// // Strategy crawlerStrategy = new AlgoDCDT();
-		// // AlgoDCDT.outerPoint = outerPointNY;
-		// //
-		// Context crawlerContext = new Context(crawlerStrategy);
-		// /**********************************************************************/
-		// Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
-		// crawlerContext.callCrawlingSingle(state, categoryID, category,
-		// envelope);
 		/************************* Testing Parameters ***************************/
 		testing();
 		// testingNY();
 		// testingUTOK();
 		// debuggingTestNY();
 		// nyPartition();
+		
+		
+		
 		Strategy.endData();
 	}
 
 	public static void testing() {
-		Strategy crawlerStrategy = new AlgoPartition();
+		//Strategy crawlerStrategy = new AlgoPartition();
+		//Strategy crawlerStrategy=new AlgoSlice();
+		Coordinate p=new Coordinate();
+		p.x=-76;
+		p.y=43;
+		Coordinate startPoint=new Coordinate();
+		startPoint.x=-76.7700405;
+		startPoint.y= 42.746632;
+		Strategy crawlerStrategy=new Hexagon_optimize();
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
-		AlgoPartition.mbrList.add(envelope);
+		//AlgoPartition.mbrList.add(envelope);
 		Context crawlerContext = new Context(crawlerStrategy);
 		crawlerContext
 				.callCrawlingSingle(state, categoryID, category, envelope);

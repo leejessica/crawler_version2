@@ -2,12 +2,15 @@ package mo.umac.crawler;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import mo.umac.db.DBExternal;
 import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
+import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSetD2;
 import mo.umac.uscensus.UScensusData;
@@ -19,6 +22,7 @@ import org.apache.log4j.Logger;
 import utils.CommonUtils;
 import utils.FileOperator;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
 public abstract class Strategy {
@@ -63,6 +67,13 @@ public abstract class Strategy {
 	public static MyRTree rtreeRectangles = new MyRTree();
 
 	public static int rectangleId = 0;
+	
+	public Strategy(){
+		System.out.println("Begin query!");
+	}
+	public Strategy(Coordinate p){
+		System.out.println("Begin query!");
+	}
 
 	/**
 	 * This is the crawling algorithm
@@ -231,8 +242,8 @@ public abstract class Strategy {
 		//
 		logger.info("countNumQueries = " + Strategy.countNumQueries);
 		logger.info("countCrawledPoints = " + Strategy.dbInMemory.poisIDs.size());
-		logger.info("Finished ! Oh ! Yeah! ");
-
+		//logger.info("Finished ! Oh ! Yeah! ");
+		
 		// logger.info("poisCrawledTimes:");
 		// Iterator it1 =
 		// CrawlerStrategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
@@ -270,6 +281,17 @@ public abstract class Strategy {
 		logger.info("countNumQueries = " + Strategy.countNumQueries);
 		logger.info("countCrawledPoints = " + Strategy.dbInMemory.poisIDs.size());
 		logger.info("Finished ! Oh ! Yeah! ");
+		logger.info("poisCrawledTimes:");
+	    Iterator it1 = Strategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
+				while (it1.hasNext()) {
+					Entry entry = (Entry) it1.next();
+					int poiID = (Integer) entry.getKey();
+					int times = (Integer) entry.getValue();
+					APOI aPOI = Strategy.dbInMemory.pois.get(poiID);
+					double longitude = aPOI.getCoordinate().x;
+					double latitude = aPOI.getCoordinate().y;
+					logger.info(poiID + ": " + times + ", " + "[" + longitude + ", " + latitude + "]");
+				  }
 		return Strategy.countNumQueries;
 	}
 

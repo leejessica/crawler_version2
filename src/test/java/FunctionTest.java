@@ -28,7 +28,7 @@ public class FunctionTest extends Strategy{
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		FunctionTest test=new FunctionTest();
 		PaintShapes.painting=true;
-		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
+		//WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		test.calling();
 	}
 	
@@ -46,12 +46,12 @@ public class FunctionTest extends Strategy{
 		LinkedList<VQP> visitedInfo=new LinkedList<VQP>();
 		VQP c=new VQP(new Coordinate(500, 500), 50);
 		Circle tc=new Circle(c.getCoordinate(),c.getRadius());
-		System.out.println("Coordinate="+tc.getCenter()+"   radius="+tc.getRadius());
-		if(PaintShapes.painting&&logger.isDebugEnabled()){
-			PaintShapes.paint.color=PaintShapes.paint.blueTranslucence;
-			PaintShapes.paint.addCircle(tc);	
-			PaintShapes.paint.myRepaint();
-		}		
+		//System.out.println("Coordinate="+tc.getCenter()+"   radius="+tc.getRadius());
+		//if(PaintShapes.painting&&logger.isDebugEnabled()){
+		//	PaintShapes.paint.color=PaintShapes.paint.blueTranslucence;
+		//	PaintShapes.paint.addCircle(tc);	
+		//	PaintShapes.paint.myRepaint();
+		//}		
 		
 		visitedInfo.add(new VQP(new Coordinate(590, 500), 40));
 		visitedInfo.add(new VQP(new Coordinate(500, 590), 50));
@@ -59,18 +59,60 @@ public class FunctionTest extends Strategy{
 		visitedInfo.add(new VQP(new Coordinate(400, 500), 60));
 		visitedInfo.add(new VQP(new Coordinate(510, 520), 30));
 		Iterator<VQP>it=visitedInfo.iterator();
-		while(it.hasNext()){
-			VQP tc1=it.next();
-			System.out.println("Coordinate="+tc1.getCoordinate()+"   radius="+tc1.getRadius());
-			Circle tc11=new Circle(tc1.getCoordinate(),tc1.getRadius());
-			if(PaintShapes.painting&&logger.isDebugEnabled()){
-				PaintShapes.paint.color=PaintShapes.paint.redTranslucence;
-				PaintShapes.paint.addCircle(tc11);	
-				PaintShapes.paint.myRepaint();
-			}		
+		//while(it.hasNext()){
+		//	VQP tc1=it.next();
+		//	System.out.println("Coordinate="+tc1.getCoordinate()+"   radius="+tc1.getRadius());
+		//	Circle tc11=new Circle(tc1.getCoordinate(),tc1.getRadius());
+		//	if(PaintShapes.painting&&logger.isDebugEnabled()){
+		//		PaintShapes.paint.addCircle(tc11);	
+		//		PaintShapes.paint.myRepaint();
+		//	}		
+		//}
+	    VQP t1=new VQP(new Coordinate(0, 0), 13.578584);
+        VQP t2=new VQP(new Coordinate(0, 18.3987540000621), 4.82018);
+        VQP t3=new VQP(new Coordinate(0,0), 13.578584000006);
+        visitedInfo.add(t2);
+        Coordinate p=new Coordinate(0, 13.578583);
+        Coordinate p1=new Coordinate(0, 18.3987540000621);
+        Hexagon_optimize crawler=new Hexagon_optimize();
+        //if(crawler.circles_Insecter(t1, t2)){
+        //	System.out.println("intersect!");
+        //	IntersectPoint q1=crawler.calculateIntersectPoint(t1, t2);
+        //	System.out.println("left="+q1.getIntersectPoint_left().toString()
+       // 			+"   right="+q1.getIntersectPoint_right().toString());
+       // 	if(crawler.isinCircle(q1.getIntersectPoint_left(),t3))
+        //		System.out.println("is in circle!");
+       // }
+       // if(crawler.isinCircle(p, t1))
+        //	System.out.println("is in circle!");
+        //double x=0.0000000000003;
+       // double y=0.00000000000002;
+       // if(x!=y)
+        //	System.out.println("x!=y");
+       // Coordinate p2=t2.getCoordinate();
+       // if(p1.equals2D(p2))
+       // 	System.out.println("equal");
+       // if(myContain2(visitedInfo, p1))
+       // 	System.out.println("contain!");		
+       
+        VQP c1=new VQP(new Coordinate(-73.355835, 42.746632),147.36656275248086);
+        VQP c2=new VQP(new Coordinate(-73.355835, 290.3356148033616),147.36656275248086);
+        IntersectPoint inter1=crawler.calculateIntersectPoint(c1, c2);
+        if(crawler.circles_Insecter(c1, c2))
+        	System.out.println("true!");
+        System.out.println(inter1.getIntersectPoint_left().toString()+"; "+inter1.getIntersectPoint_right().toString());
+        System.out.println("end calling!");
+	}
+	private boolean myContain2(LinkedList<VQP> q, Coordinate c) {
+		boolean flag=false;
+		System.out.println(q.size());
+		for (int i = 0; i < q.size()&&!flag; i++) {
+			Coordinate one = q.get(i).getCoordinate();
+			if (c.equals2D(one)) {
+				 flag=true;
+			}
 		}
-		
-		
+		return flag;
 	}
 
 }
