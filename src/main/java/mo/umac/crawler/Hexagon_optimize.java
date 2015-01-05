@@ -42,8 +42,10 @@ public class Hexagon_optimize extends Strategy {
 	private static Coordinate startPoint=new Coordinate();
 	
 	public Hexagon_optimize() {
-		startPoint.x=-73.355835;
-		startPoint.y= 42.746632;
+		//startPoint.x=-73.355835;
+		//startPoint.y= 42.746632;
+		startPoint.x=-73;
+		startPoint.y= 42;
 		logger.info("------------HexagonCrawler2_Modify------------");
 	}
 	
@@ -263,7 +265,7 @@ public class Hexagon_optimize extends Strategy {
 						flag++;
 						
 						double temp_radius = calculateIncircle(startPoint,
-								point1, radius1, point2, radius2);
+								vqp,vqp1);
 						minRadius = Math.min(temp_radius, minRadius);	
 					}
 				}
@@ -383,8 +385,7 @@ public class Hexagon_optimize extends Strategy {
 					double radius2 = avqp1.getRadius();
 					if (Math.abs(point1.distance(point2) - sqrt3 * key
 							* crawl_radius) < 1e-6) {
-						double tem_radius = calculateIncircle(point, point1,
-								radius1, point2, radius2);
+						double tem_radius = calculateIncircle(point, avqp,avqp1);
 						minRadius = Math.min(minRadius, tem_radius);
 					}
 
@@ -439,40 +440,13 @@ public class Hexagon_optimize extends Strategy {
 	/*
 	 * algorithm 1 To calculate the maximum inscribed circle of a given area
 	 */
-	public double calculateIncircle(Coordinate startPoint, Coordinate point1,
-			double radius1, Coordinate point2, double radius2) {
-		double AB = startPoint.distance(point1);
-		double AD = startPoint.distance(point2);
-		double BD = point1.distance(point2);
-		double cosBCD = (Math.pow(radius1, 2) + Math.pow(radius2, 2) - Math
-				.pow(BD, 2)) / (2 * radius1 * radius2);
-		double angleBCD = Math.acos(cosBCD);
-		double cosBAD = (Math.pow(AB, 2) + Math.pow(AD, 2) - Math.pow(BD, 2))
-				/ (2 * AB * AD);
-		double angleBAD = Math.acos(cosBAD);
-		/*
-		 * using cosine rule to calculate AC
-		 */
-		double a1 = Math.pow(AB, 2) + Math.pow(radius1, 2) - Math.pow(AD, 2)
-				- Math.pow(radius2, 2);
-		double a2 = 2 * AB * radius1;
-		double a3 = 2 * AD * radius2
-				* Math.cos(2 * Math.PI - angleBCD - angleBAD);
-		double a4 = 2 * AD * radius2
-				* Math.sin(2 * Math.PI - angleBCD - angleBAD);
-		double b1 = Math.pow(a4, 2) - Math.pow(a1, 2);
-		double b2 = Math.pow((a2 - a3), 2) + Math.pow(a4, 2);
-		double b3 = 2 * a1 * (a2 - a3);
-
-		double X1 = (b3 + Math.sqrt(Math.pow(b3, 2) + 4 * b2 * b1)) / (2 * b2);
-		double X2 = (b3 - Math.sqrt(Math.pow(b3, 2) + 4 * b2 * b1)) / (2 * b2);
-		double AC1 = Math.sqrt(Math.pow(AB, 2) + Math.pow(radius1, 2) - 2 * AB
-				* radius1 * X1);
-		double AC2 = Math.sqrt(Math.pow(AB, 2) + Math.pow(radius1, 2) - 2 * AB
-				* radius1 * X2);
-		double AC = Math.max(AC1, AC2);
-		return AC;
+	public double calculateIncircle(Coordinate startPoint, VQP circle1, VQP circle2) {
+		IntersectPoint inter=calculateIntersectPoint(circle1, circle2);
+		double d1=inter.getIntersectPoint_left().distance(startPoint);
+		double d2=inter.getIntersectPoint_right().distance(startPoint);
+		return Math.max(d1, d2);
 	}
+	
 
 	/* calculate the intersecting points of two circle */
 	public IntersectPoint calculateIntersectPoint(VQP circle1, VQP circle2) {
