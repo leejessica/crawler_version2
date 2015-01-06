@@ -72,13 +72,16 @@ public class FunctionTest extends Strategy{
         VQP t2=new VQP(new Coordinate(0, 18.3987540000621), 4.82018);
         VQP t3=new VQP(new Coordinate(0,0), 13.578584000006);
         visitedInfo.add(t2);
+       
+        Iterator<VQP>it=visitedInfo.iterator();
+        visitedInfo.removeFirst();
         System.out.println(visitedInfo.size());
         Iterator<VQP>it1=visitedInfo.iterator();
         while(it1.hasNext()){
         	VQP cc1=it1.next();
         	System.out.println(cc1.getCoordinate().toString()+"=======================");
         	Iterator<VQP>it2=visitedInfo.iterator();
-        	while(it2.hasNext()){
+        	while(it.hasNext()){
         		VQP cc2=it2.next();
         		System.out.println(cc2.getCoordinate().toString());
         	}

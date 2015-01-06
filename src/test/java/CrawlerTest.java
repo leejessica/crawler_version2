@@ -49,8 +49,8 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 	public static void main(String[] args) {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		CrawlerTest test = new CrawlerTest();
-		PaintShapes.painting = true;
-		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
+		PaintShapes.painting = false;
+		//WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		//Coordinate startPoint=new Coordinate();
 		test.calling();
 

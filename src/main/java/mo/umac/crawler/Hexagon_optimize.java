@@ -547,7 +547,7 @@ public class Hexagon_optimize extends Strategy {
 					VQP c1=it1.next();
 					boolean effective=true;
 					Iterator<VQP>it2=tempNeighbor_set.iterator();
-					while(it.hasNext()&&effective){
+					while(it2.hasNext()&&effective){
 						VQP c2=it2.next();
 						if(!pointsequal(c1.getCoordinate(),c2.getCoordinate())){
 							if(circle_contain(c2, c1)){
@@ -674,9 +674,7 @@ public class Hexagon_optimize extends Strategy {
 					circletemp1);
 			boolean stopleft = false;
 			boolean stopright = false;
-			if (isinCircle(inter1.getIntersectPoint_left(), circle)
-					|| isAtCircumference(inter1.getIntersectPoint_left(),
-							circle)) {
+			if (isinCircle(inter1.getIntersectPoint_left(), circle)) {
 				Iterator<VQP> it3 = intercircleQ.iterator();
 				while (it3.hasNext() && !stopleft) {
 					VQP circletemp2 = it3.next();
@@ -694,9 +692,7 @@ public class Hexagon_optimize extends Strategy {
 			} else {
 				stopleft = true;
 			}
-			if (isinCircle(inter1.getIntersectPoint_right(), circle)
-					|| isAtCircumference(inter1.getIntersectPoint_right(),
-							circle)) {
+			if (isinCircle(inter1.getIntersectPoint_right(), circle)) {
 				Iterator<VQP> it4 = intercircleQ.iterator();
 				while (it4.hasNext() && !stopright) {
 					VQP circletemp3 = it4.next();
