@@ -58,7 +58,7 @@ public class FunctionTest extends Strategy{
 		visitedInfo.add(new VQP(new Coordinate(410, 500), 60));
 		visitedInfo.add(new VQP(new Coordinate(400, 500), 60));
 		visitedInfo.add(new VQP(new Coordinate(510, 520), 30));
-		Iterator<VQP>it=visitedInfo.iterator();
+		//Iterator<VQP>it=visitedInfo.iterator();
 		//while(it.hasNext()){
 		//	VQP tc1=it.next();
 		//	System.out.println("Coordinate="+tc1.getCoordinate()+"   radius="+tc1.getRadius());
@@ -72,6 +72,18 @@ public class FunctionTest extends Strategy{
         VQP t2=new VQP(new Coordinate(0, 18.3987540000621), 4.82018);
         VQP t3=new VQP(new Coordinate(0,0), 13.578584000006);
         visitedInfo.add(t2);
+        System.out.println(visitedInfo.size());
+        Iterator<VQP>it1=visitedInfo.iterator();
+        while(it1.hasNext()){
+        	VQP cc1=it1.next();
+        	System.out.println(cc1.getCoordinate().toString()+"=======================");
+        	Iterator<VQP>it2=visitedInfo.iterator();
+        	while(it2.hasNext()){
+        		VQP cc2=it2.next();
+        		System.out.println(cc2.getCoordinate().toString());
+        	}
+        	
+        }
         Coordinate p=new Coordinate(0, 13.578583);
         Coordinate p1=new Coordinate(0, 18.3987540000621);
         Hexagon_optimize crawler=new Hexagon_optimize();
@@ -95,12 +107,17 @@ public class FunctionTest extends Strategy{
        // if(myContain2(visitedInfo, p1))
        // 	System.out.println("contain!");		
        
-        VQP c1=new VQP(new Coordinate(-73.355835, 42.746632),147.36656275248086);
-        VQP c2=new VQP(new Coordinate(-73.355835, 290.3356148033616),147.36656275248086);
-        IntersectPoint inter1=crawler.calculateIntersectPoint(c1, c2);
-        if(crawler.circles_Insecter(c1, c2))
-        	System.out.println("true!");
-        System.out.println(inter1.getIntersectPoint_left().toString()+"; "+inter1.getIntersectPoint_right().toString());
+      //  VQP c1=new VQP(new Coordinate(-73.355835, 42.746632),147.36656275248086);
+       // VQP c2=new VQP(new Coordinate(-73.355835, 290.3356148033616),147.36656275248086);
+       // IntersectPoint inter1=crawler.calculateIntersectPoint(c1, c2);
+       // if(crawler.circles_Insecter(c1, c2))
+     //   	System.out.println("true!");
+      //  System.out.println(inter1.getIntersectPoint_left().toString()+"; "+inter1.getIntersectPoint_right().toString());
+        
+      //  VQP c1=new VQP(new Coordinate(0, 0), 13.4678251);
+      //  VQP c2=new VQP(new Coordinate(0, 5.8257795), 7.6420456);
+      //  if(crawler.circle_contain(c1, c2))
+      //  	System.out.println("circle_contain!");
         System.out.println("end calling!");
 	}
 	private boolean myContain2(LinkedList<VQP> q, Coordinate c) {

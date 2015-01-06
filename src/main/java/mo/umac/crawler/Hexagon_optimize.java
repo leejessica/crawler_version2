@@ -728,13 +728,12 @@ public class Hexagon_optimize extends Strategy {
 		double l3 = circle1.getRadius() + circle2.getRadius();
 		if (l2 < l1 && l1 < l3) {
 			intersect = true;
-			// System.out.println("intersect="+intersect);
 		}
 		return intersect;
 	}
 
 	// to determine whether a circle contains another circle and assume that
-	// circle1.radius>circle2.radius 
+	// circle1.radius>circle2.radius(i.e., judge if circle1 contains circle2)
 	public boolean circle_contain(VQP circle1, VQP circle2) {
 		double d1 = circle1.getCoordinate().distance(circle2.getCoordinate());
 		double d2 = circle1.getRadius() - circle2.getRadius();
