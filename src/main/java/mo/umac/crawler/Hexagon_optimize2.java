@@ -80,8 +80,8 @@ public class Hexagon_optimize2 extends Strategy {
 		// LinkedList<Coordinate> visited_Queue1 = new LinkedList<Coordinate>();
 		LinkedList<Coordinate> unvisited_Queue = new LinkedList<Coordinate>();
 		// @param visitedcircle_Queue: record the information(coordinate,
-		// radius)of the visited points
-		LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
+				// radius)of the visited points
+				LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
 		ununiformlyquery(startPoint, envelopeState, visited_Queue,
 				visitedcircle_Queue, unvisited_Queue, state, category, query);
 		logger.info("eligiblepoint=" + countPoint);
@@ -248,7 +248,10 @@ public class Hexagon_optimize2 extends Strategy {
 			//hole detection
 			Set<Coordinate>holeP=new HashSet<Coordinate>();
 			holeP=holeDetection(visitedsamelevel, radius);
-			
+			if(!holeP.isEmpty()){
+				//cover the hole
+				holeCover(state, category, query, holeP, visitedcircle_Queue, visitedsamelevel);
+			}
 			
 			//jugde if the circumference of the maxInscribedcircle is completely covered 
 			
@@ -339,7 +342,8 @@ public class Hexagon_optimize2 extends Strategy {
 		return holeP;
 	}
 	
-	public void holeCover(Set<Coordinate>holeP, String state, int category, String query){
+	public void holeCover( String state, int category, String query, Set<Coordinate>holeP,
+			LinkedList<VQP>visitedcircle_Queue,LinkedList<VQP>visitedsamelevel){
 		//cover the hole
 		Iterator<Coordinate> itcover1=holeP.iterator();
 		while(itcover1.hasNext()){
