@@ -158,7 +158,7 @@ public class Hexagon_optimize2 extends Strategy {
 		// Hexagon.length
 		LinkedList<VQP> lowRadiu = new LinkedList<VQP>();
 		// record all the visisted point on the same level query
-		LinkedList<VQP> visitedsamelevel = new LinkedList<VQP>();
+		Set<VQP> visitedsamelevel = new HashSet<VQP>();
 		AQuery Firstquery = new AQuery(startPoint, state, category, query,
 				MAX_TOTAL_RESULTS_RETURNED); // issue the first query
 		ResultSetD2 resultSetStart = query(Firstquery);
@@ -247,14 +247,14 @@ public class Hexagon_optimize2 extends Strategy {
 			}
 			//hole detection
 			Set<Coordinate>holeP=new HashSet<Coordinate>();
-			holeP=holeDetection(visitedsamelevel, radius);
+			holeP=holeDetection(visitedsamelevel, radius, maxInscribedcircle);
 			if(!holeP.isEmpty()){
 				//cover the hole
 				holeCover(state, category, query, holeP, visitedcircle_Queue, visitedsamelevel);
 			}
 			
 			//jugde if the circumference of the maxInscribedcircle is completely covered 
-			
+			if()
 			/* calculate the cover radius */
 			double minRadius = 1e308;
 			int flag = 0;
@@ -307,7 +307,7 @@ public class Hexagon_optimize2 extends Strategy {
 	 * @param visitedsamelevel: a list which record all the query issued on the same level
 	 * @param radius: the radius of the first query
 	 * */
-	public Set<Coordinate> holeDetection(LinkedList<VQP>visitedsamelevel, double radius ){
+	public Set<Coordinate> holeDetection(Set<VQP>visitedsamelevel, double radius, VQP circle){
 		
 		/* hole detection */
 		Set<Coordinate> holeP = new HashSet<Coordinate>();
@@ -323,9 +323,9 @@ public class Hexagon_optimize2 extends Strategy {
 						double midX = (c_1.getCoordinate().x + c_2.getCoordinate().x) / 2;
 						double midY = (c_1.getCoordinate().y + c_2	.getCoordinate().y) / 2;
 						Coordinate midP = new Coordinate(midX, midY);
-						Coordinate a[] = line_circle_intersect(startPoint,maxInscribedcircle.getRadius(), midP);
-						Coordinate SM = new Coordinate(midP.x- startPoint.x, midP.y - startPoint.y);
-						Coordinate SQ1 = new Coordinate(a[0].x- startPoint.x, a[0].y - startPoint.y);
+						Coordinate a[] = line_circle_intersect(circle.getCoordinate(),circle.getRadius(), midP);
+						Coordinate SM = new Coordinate(midP.x- circle.getCoordinate().x, midP.y - circle.getCoordinate().y);
+						Coordinate SQ1 = new Coordinate(a[0].x- circle.getCoordinate().x, a[0].y - circle.getCoordinate().y);
 						Coordinate coverP = new Coordinate();
 
 						// judge the middle point of the arc through vector colineation
@@ -343,7 +343,7 @@ public class Hexagon_optimize2 extends Strategy {
 	}
 	
 	public void holeCover( String state, int category, String query, Set<Coordinate>holeP,
-			LinkedList<VQP>visitedcircle_Queue,LinkedList<VQP>visitedsamelevel){
+			LinkedList<VQP>visitedcircle_Queue,Set<VQP>visitedsamelevel){
 		//cover the hole
 		Iterator<Coordinate> itcover1=holeP.iterator();
 		while(itcover1.hasNext()){
@@ -355,7 +355,7 @@ public class Hexagon_optimize2 extends Strategy {
 			int s=resultcover.getPOIs().size();
 			double radiuscover=pointcover.distance(resultcover.getPOIs().get(s-1).getCoordinate());
 			visitedcircle_Queue.addLast(new VQP(pointcover, radiuscover));
-			visitedsamelevel.addLast(new VQP(pointcover, radiuscover));
+			visitedsamelevel.add(new VQP(pointcover, radiuscover));
 		}
 		//clear the set holeP
 		holeP.clear();
@@ -723,7 +723,7 @@ public class Hexagon_optimize2 extends Strategy {
 		}
 		return coverage;
 	}
-
+	
 	/*
 	 * to determine whether an arc is covered by other neighbor circles of the
 	 * circle or not
