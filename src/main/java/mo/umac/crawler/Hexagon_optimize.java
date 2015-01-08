@@ -158,7 +158,7 @@ public class Hexagon_optimize extends Strategy {
 		ResultSetD2 resultSetStart = query(Firstquery);
 		countquery++;
 		Set<APOI> queryset = new HashSet<APOI>(); // record all point queried
-		Set<APOI> eligibleset = new HashSet<APOI>(); // record all eligible
+		Set<APOI> eligibleset = new HashSet<APOI>(); // record all eligible  
 														// point
 		queryset.addAll(resultSetStart.getPOIs()); // put all points gotten from
 													// querying into a set

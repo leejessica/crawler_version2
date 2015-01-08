@@ -158,7 +158,7 @@ public class Hexagon_optimize2 extends Strategy {
 		// Hexagon.length
 		LinkedList<VQP> lowRadiu = new LinkedList<VQP>();
 		// record all the visisted point on the same level query
-		Set<VQP> visitedsamelevel = new HashSet<VQP>();
+		LinkedList<VQP> visitedsamelevel = new LinkedList<VQP>();
 		AQuery Firstquery = new AQuery(startPoint, state, category, query,
 				MAX_TOTAL_RESULTS_RETURNED); // issue the first query
 		ResultSetD2 resultSetStart = query(Firstquery);
@@ -254,48 +254,58 @@ public class Hexagon_optimize2 extends Strategy {
 			}
 			
 			//jugde if the circumference of the maxInscribedcircle is completely covered 
-			if()
-			/* calculate the cover radius */
-			double minRadius = 1e308;
-			int flag = 0;
+			Set<VQP> visitedsamelevel1=new HashSet<VQP>();
+			for(int i=0; i<visitedsamelevel.size();i++){
+				VQP scircle=visitedsamelevel.get(i);
+				if(circles_Insecter(scircle, maxInscribedcircle))
+					visitedsamelevel1.add(scircle);
+			}
+			
+			if(isCircumferenceCoverage(maxInscribedcircle, visitedsamelevel1))
+			{
+				/* calculate the cover radius */
+				double minRadius = 1e308;
+				int flag = 0;
 
-			while (!visited_Queue.isEmpty()) {
+				while (!visited_Queue.isEmpty()) {
 
-				VQP vqp = visited_Queue.removeFirst();
-				Coordinate point1 = vqp.getCoordinate();
-				double radius1 = vqp.getRadius();
-				Iterator<VQP> iterator = visited_Queue.iterator();
-				while (iterator.hasNext()) {
-					VQP vqp1 = iterator.next();
-					Coordinate point2 = vqp1.getCoordinate();
-					double radius2 = vqp1.getRadius();
-					if (Math.abs(point1.distance(point2) - sqrt3 * key * radius) < 1e-6) {
-						flag++;
+					VQP vqp = visited_Queue.removeFirst();
+					Coordinate point1 = vqp.getCoordinate();
+					double radius1 = vqp.getRadius();
+					Iterator<VQP> iterator = visited_Queue.iterator();
+					while (iterator.hasNext()) {
+						VQP vqp1 = iterator.next();
+						Coordinate point2 = vqp1.getCoordinate();
+						double radius2 = vqp1.getRadius();
+						if (Math.abs(point1.distance(point2) - sqrt3 * key * radius) < 1e-6) {
+							flag++;
 
-						double temp_radius = calculateIncircle(startPoint, vqp,
-								vqp1);
-						minRadius = Math.min(temp_radius, minRadius);
+							double temp_radius = calculateIncircle(startPoint, vqp,
+									vqp1);
+							minRadius = Math.min(temp_radius, minRadius);
+						}
 					}
 				}
-			}
-			double coverRadius = minRadius;
-			Circle circle = new Circle(startPoint, coverRadius);
-			if (logger.isDebugEnabled() && PaintShapes.painting) {
-				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-				PaintShapes.paint.addCircle(circle);
-				PaintShapes.paint.myRepaint();
-			}
+				double coverRadius = minRadius;
+				Circle circle = new Circle(startPoint, coverRadius);
+				if (logger.isDebugEnabled() && PaintShapes.painting) {
+					PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+					PaintShapes.paint.addCircle(circle);
+					PaintShapes.paint.myRepaint();
+				}
 
-			// compute the number of eligible point
-			Iterator<APOI> it = queryset.iterator();
-			while (it.hasNext()) {
-				int id = it.next().getId();
-				APOI pp = DBInMemory.pois.get(id);
-				if (startPoint.distance(pp.getCoordinate()) < coverRadius
-						|| Math.abs(startPoint.distance(pp.getCoordinate())
-								- coverRadius) < 1e-6)
-					eligibleset.add(pp);
+				// compute the number of eligible point
+				Iterator<APOI> it = queryset.iterator();
+				while (it.hasNext()) {
+					int id = it.next().getId();
+					APOI pp = DBInMemory.pois.get(id);
+					if (startPoint.distance(pp.getCoordinate()) < coverRadius
+							|| Math.abs(startPoint.distance(pp.getCoordinate())
+									- coverRadius) < 1e-6)
+						eligibleset.add(pp);
+				}
 			}
+			
 			countPoint = eligibleset.size();
 			logger.info("eliglible point during the query=" + countPoint
 					+ "  level=" + level);
@@ -303,11 +313,12 @@ public class Hexagon_optimize2 extends Strategy {
 		}
 	}
 
+    
 	/*
 	 * @param visitedsamelevel: a list which record all the query issued on the same level
 	 * @param radius: the radius of the first query
 	 * */
-	public Set<Coordinate> holeDetection(Set<VQP>visitedsamelevel, double radius, VQP circle){
+	public Set<Coordinate> holeDetection(LinkedList<VQP>visitedsamelevel, double radius, VQP circle){
 		
 		/* hole detection */
 		Set<Coordinate> holeP = new HashSet<Coordinate>();
@@ -343,7 +354,7 @@ public class Hexagon_optimize2 extends Strategy {
 	}
 	
 	public void holeCover( String state, int category, String query, Set<Coordinate>holeP,
-			LinkedList<VQP>visitedcircle_Queue,Set<VQP>visitedsamelevel){
+			LinkedList<VQP>visitedcircle_Queue,LinkedList<VQP>visitedsamelevel){
 		//cover the hole
 		Iterator<Coordinate> itcover1=holeP.iterator();
 		while(itcover1.hasNext()){
@@ -508,14 +519,43 @@ public class Hexagon_optimize2 extends Strategy {
 	}
 
 	/*
-	 * algorithm 1 To calculate the maximum inscribed circle of a given area
+	 *  @param centerPoint: the center of the maximum inscribed circle
+	 *  @param visitedsamelevel1: a list of queries issued at the same level
 	 */
-	public double calculateIncircle(Coordinate startPoint, VQP circle1,
-			VQP circle2) {
-		IntersectPoint inter = calculateIntersectPoint(circle1, circle2);
-		double d1 = inter.getIntersectPoint_left().distance(startPoint);
-		double d2 = inter.getIntersectPoint_right().distance(startPoint);
-		return Math.max(d1, d2);
+	public double calculateIncircle(Coordinate centerPoint, LinkedList<VQP>visitedsamelevel) {
+		double minRadiu=1e308;
+		for(int i=0; i<visitedsamelevel.size();i++){
+			VQP circle1=visitedsamelevel.get(i);
+			for(int j=i+1; j<visitedsamelevel.size();j++){
+				VQP circle2=visitedsamelevel.get(j);
+				if(circles_Insecter(circle1, circle2)){
+					IntersectPoint inter=calculateIntersectPoint(circle1, circle2);
+					double d1=inter.getIntersectPoint_left().distance(centerPoint);
+					double d2=inter.getIntersectPoint_right().distance(centerPoint);
+					//Coordinate temPoint=new Coordinate();
+					if(d1>=d2){
+						for(int k=0;k<visitedsamelevel.size();k++){
+							if(k!=i&&k!=j){
+								VQP circle3=visitedsamelevel.get(k);
+								if(!isinCircle(inter.getIntersectPoint_left(),circle3))
+									minRadiu=Math.min(minRadiu, d1);
+							}
+						}
+					}
+					else{
+						for(int m=0; m<visitedsamelevel.size();m++){
+							if(m!=i&&m!=j){
+								VQP circle4=visitedsamelevel.get(m);
+								if(!isinCircle(inter.getIntersectPoint_right(), circle4))
+									minRadiu=Math.min(minRadiu, d2);
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		return minRadiu;
 	}
 
 	/* calculate the intersecting points of two circle */
