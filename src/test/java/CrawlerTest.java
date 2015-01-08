@@ -50,7 +50,7 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		CrawlerTest test = new CrawlerTest();
 		PaintShapes.painting = false;
-		//WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
+	//	WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		//Coordinate startPoint=new Coordinate();
 		test.calling();
 

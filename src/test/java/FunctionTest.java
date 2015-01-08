@@ -73,20 +73,6 @@ public class FunctionTest extends Strategy{
         VQP t3=new VQP(new Coordinate(0,0), 13.578584000006);
         visitedInfo.add(t2);
        
-        Iterator<VQP>it=visitedInfo.iterator();
-        visitedInfo.removeFirst();
-        System.out.println(visitedInfo.size());
-        Iterator<VQP>it1=visitedInfo.iterator();
-        while(it1.hasNext()){
-        	VQP cc1=it1.next();
-        	System.out.println(cc1.getCoordinate().toString()+"=======================");
-        	Iterator<VQP>it2=visitedInfo.iterator();
-        	while(it.hasNext()){
-        		VQP cc2=it2.next();
-        		System.out.println(cc2.getCoordinate().toString());
-        	}
-        	
-        }
         Coordinate p=new Coordinate(0, 13.578583);
         Coordinate p1=new Coordinate(0, 18.3987540000621);
         Hexagon_optimize crawler=new Hexagon_optimize();
@@ -121,6 +107,25 @@ public class FunctionTest extends Strategy{
       //  VQP c2=new VQP(new Coordinate(0, 5.8257795), 7.6420456);
       //  if(crawler.circle_contain(c1, c2))
       //  	System.out.println("circle_contain!");
+        
+       VQP circle1=new VQP(new Coordinate(-73.68502914116391, 42.63456365243072),0.06170537896056009);
+       VQP circletemp1=new VQP(new Coordinate(-73.7474520582137, 42.634563652430714),0.02145117424391179);
+        double dist1=circletemp1.getCoordinate().distance(circle1.getCoordinate());
+        double dist2=circle1.getRadius()-circletemp1.getRadius();
+        double dist3=circle1.getRadius()+circletemp1.getRadius();
+        System.out.println("d1="+dist1+"   d2="+dist2+"   d3="+dist3);
+        if(crawler.circles_Insecter(circle1, circletemp1)){
+        	System.out.println("intersect!");
+        	IntersectPoint inter11=crawler.calculateIntersectPoint(circle1, circletemp1);
+        	System.out.println("left="+inter11.getIntersectPoint_left().toString());
+       	System.out.println("right="+inter11.getIntersectPoint_right().toString());
+        }
+        
+        //Coordinate tt1=new Coordinate(-73.74305287532752000000200000000001,  42.6345636524307140057);
+       // Coordinate tt2=new Coordinate(-73.74305287532752000000200000000001,  42.6345636524307140057);
+       // if(tt1.equals(tt2))
+       // 	System.out.println("equal!");
+        
         System.out.println("end calling!");
 	}
 	private boolean myContain2(LinkedList<VQP> q, Coordinate c) {
