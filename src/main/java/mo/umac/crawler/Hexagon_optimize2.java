@@ -362,47 +362,7 @@ public class Hexagon_optimize2 extends Strategy {
 		// @param coverRadius:record the maximum inscribed circle of the covered
 		// region
 		double coverRadius = firstVqp.getRadius();
-		LinkedList<Coordinate>unvisited_Queue=new LinkedList<Coordinate>();
-		//record all queries issued at the same level
-		LinkedList<VQP>visitedsamelevel=new LinkedList<VQP>();
 		
-		calculatePoint(firstVqp.getCoordinate(), firstVqp.getRadius(), visitedcircle_Queue,
-				unvisited_Queue);
-		Circle circle = new Circle(firstVqp.getCoordinate(), coverRadius);
-		if (logger.isDebugEnabled() && PaintShapes.painting) {
-			PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
-			PaintShapes.paint.addCircle(circle);
-			PaintShapes.paint.myRepaint();
-		}
-         //record all the circles which intersect with the hexagon
-		LinkedList<VQP>intersectwithHex=new LinkedList<VQP>();
-		VQP hex=new VQP(firstVqp.getCoordinate(), radius*key);
-		Iterator<VQP> it=visitedcircle_Queue.iterator();
-		while(it.hasNext()){
-			VQP vqp1=it.next();
-			if(circles_Insecter(hex, vqp1))
-				intersectwithHex.add(vqp1);
-		}
-		//issue the first level query
-		for(int i=0; i<unvisited_Queue.size();i++){
-			Coordinate p=unvisited_Queue.get(i);
-			VQP vqp=new VQP(p, firstVqp.getRadius());
-			if(needQuery(vqp, visitedcircle_Queue, envelopeState)){
-				AQuery aquery=new AQuery(p, state,category, query, MAX_TOTAL_RESULTS_RETURNED);
-				ResultSetD2 result=query(aquery);
-				countquery++;
-				queryset.addAll(result.getPOIs());
-				int size=result.getPOIs().size();
-				double pr=p.distance(result.getPOIs().get(size-1).getCoordinate());
-				visitedcircle_Queue.addLast(new VQP(p, pr));
-				visitedsamelevel.add(new VQP(p, pr));
-			}
-			else{
-				visitedsamelevel.add(vqp);
-				visitedcircle_Queue.addLast(vqp);
-			}
-		}
-	    //hole detection
 		return coverRadius;
 	}
 
