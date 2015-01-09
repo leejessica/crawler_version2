@@ -81,7 +81,7 @@ public class Hexagon_optimize2 extends Strategy {
 		LinkedList<Coordinate> unvisited_Queue = new LinkedList<Coordinate>();
 		// @param visitedcircle_Queue: record the information(coordinate,
 				// radius)of the visited points
-				LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
+		LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
 		ununiformlyquery(startPoint, envelopeState, visited_Queue,
 				visitedcircle_Queue, unvisited_Queue, state, category, query);
 		logger.info("eligiblepoint=" + countPoint);
@@ -264,29 +264,7 @@ public class Hexagon_optimize2 extends Strategy {
 			if(isCircumferenceCoverage(maxInscribedcircle, visitedsamelevel1))
 			{
 				/* calculate the cover radius */
-				double minRadius = 1e308;
-				int flag = 0;
-
-				while (!visited_Queue.isEmpty()) {
-
-					VQP vqp = visited_Queue.removeFirst();
-					Coordinate point1 = vqp.getCoordinate();
-					double radius1 = vqp.getRadius();
-					Iterator<VQP> iterator = visited_Queue.iterator();
-					while (iterator.hasNext()) {
-						VQP vqp1 = iterator.next();
-						Coordinate point2 = vqp1.getCoordinate();
-						double radius2 = vqp1.getRadius();
-						if (Math.abs(point1.distance(point2) - sqrt3 * key * radius) < 1e-6) {
-							flag++;
-
-							double temp_radius = calculateIncircle(startPoint, vqp,
-									vqp1);
-							minRadius = Math.min(temp_radius, minRadius);
-						}
-					}
-				}
-				double coverRadius = minRadius;
+               double coverRadius=calculateIncircle(startPoint, visitedsamelevel);
 				Circle circle = new Circle(startPoint, coverRadius);
 				if (logger.isDebugEnabled() && PaintShapes.painting) {
 					PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
@@ -299,20 +277,21 @@ public class Hexagon_optimize2 extends Strategy {
 				while (it.hasNext()) {
 					int id = it.next().getId();
 					APOI pp = DBInMemory.pois.get(id);
-					if (startPoint.distance(pp.getCoordinate()) < coverRadius
-							|| Math.abs(startPoint.distance(pp.getCoordinate())
-									- coverRadius) < 1e-6)
+					if (!(startPoint.distance(pp.getCoordinate()) > coverRadius))
 						eligibleset.add(pp);
 				}
+				countPoint = eligibleset.size();
+			}			
+			if(!isCircumferenceCoverage(maxInscribedcircle, visitedsamelevel1)||countPoint<NEED_POINTS_NUMBER){
+				for(int i=0; i<lowRadiu.size();i++){
+					VQP lowcircle=lowRadiu.get(i);
+					double inRadius=queryInHexagon();
+				}
 			}
-			
-			countPoint = eligibleset.size();
-			logger.info("eliglible point during the query=" + countPoint
-					+ "  level=" + level);
+				
 			level++;
 		}
 	}
-
     
 	/*
 	 * @param visitedsamelevel: a list which record all the query issued on the same level
@@ -377,104 +356,53 @@ public class Hexagon_optimize2 extends Strategy {
 	 * 
 	 * @radius: the radius of the circle with the center of startPoint
 	 */
-	public double queryInHexagon(Coordinate point, double crawl_radius,
-			Envelope envelopeState, double radius,
-			LinkedList<VQP> visited_Queue, LinkedList<VQP> visitedcircle_Queue,
-			LinkedList<Coordinate> unvisited_Queue, String state, int category,
-			String query, Set<APOI> set) {
+	public double queryInHexagon(VQP firstVqp,double radius,
+			Envelope envelopeState, String state, int category,
+			String query, LinkedList<VQP> visitedcircle_Queue ) {
 		// @param coverRadius:record the maximum inscribed circle of the covered
 		// region
-		double coverRadius = crawl_radius;
-		/* compute coordinates of the points which are used to next query */
-		calculatePoint(point, crawl_radius, visitedcircle_Queue,
+		double coverRadius = firstVqp.getRadius();
+		LinkedList<Coordinate>unvisited_Queue=new LinkedList<Coordinate>();
+		//record all queries issued at the same level
+		LinkedList<VQP>visitedsamelevel=new LinkedList<VQP>();
+		
+		calculatePoint(firstVqp.getCoordinate(), firstVqp.getRadius(), visitedcircle_Queue,
 				unvisited_Queue);
-		Circle circle = new Circle(point, coverRadius);
+		Circle circle = new Circle(firstVqp.getCoordinate(), coverRadius);
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
 			PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
 			PaintShapes.paint.addCircle(circle);
 			PaintShapes.paint.myRepaint();
 		}
-
-		int temp_Level = 1;
-		while (coverRadius < key * radius) {
-			for (int i = 1; i <= 6 * temp_Level; i++) {
-				if (!unvisited_Queue.isEmpty()) {
-					Coordinate q = unvisited_Queue.removeFirst();
-					/*
-					 * compute coordinates of the points which are used to next
-					 * query
-					 */
-					calculatePoint(q, crawl_radius, visitedcircle_Queue,
-							unvisited_Queue);
-					/*
-					 * determine whether need issue query in position q
-					 */
-					VQP c = new VQP(q, crawl_radius);
-					// the query is needed
-					if (needQuery(c, visitedcircle_Queue, envelopeState)) {
-						AQuery InhexgonQuery = new AQuery(q, state, category,
-								query, MAX_TOTAL_RESULTS_RETURNED);
-						ResultSetD2 resultSetInhexgon = query(InhexgonQuery);
-						countquery++;
-						set.addAll(resultSetInhexgon.getPOIs());
-						int size = resultSetInhexgon.getPOIs().size();
-						APOI farthest = resultSetInhexgon.getPOIs().get(
-								size - 1);
-						Coordinate farthestCoordinate = farthest
-								.getCoordinate();
-						double distance = q.distance(farthestCoordinate);
-						double inRadius = distance;
-						visitedcircle_Queue.addLast(new VQP(q, inRadius));
-						// recursively call the InHexagon algorithm
-						if (inRadius < key * crawl_radius) {
-							LinkedList<VQP> temp_visited_Queue1 = new LinkedList<VQP>();
-							// LinkedList<Coordinate> temp_visited_Queue11 = new
-							// LinkedList<Coordinate>();
-							LinkedList<Coordinate> temp_unvisited_Queue1 = new LinkedList<Coordinate>();
-							inRadius = queryInHexagon(q, inRadius,
-									envelopeState, crawl_radius,
-									temp_visited_Queue1, visitedcircle_Queue,
-									temp_unvisited_Queue1, state, category,
-									query, set);
-						}
-						Circle aaaCircle = new Circle(q, inRadius);
-						if (logger.isDebugEnabled() && PaintShapes.painting) {
-							PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
-							PaintShapes.paint.addCircle(aaaCircle);
-							PaintShapes.paint.myRepaint();
-						}
-						VQP qVQP = new VQP(q, inRadius);
-						visited_Queue.addLast(qVQP);
-					} else {
-						visitedcircle_Queue.addLast(c);
-						visited_Queue.addLast(c);
-					}
-				}
-			}
-
-			/* calculate the incircle */
-			double minRadius = 1e308;
-			while (!visited_Queue.isEmpty()) {
-				VQP avqp = visited_Queue.removeFirst();
-				Coordinate point1 = avqp.getCoordinate();
-				double radius1 = avqp.getRadius();
-				Iterator<VQP> it = visited_Queue.iterator();
-				while (it.hasNext()) {
-					VQP avqp1 = it.next();
-					Coordinate point2 = avqp1.getCoordinate();
-					double radius2 = avqp1.getRadius();
-					if (Math.abs(point1.distance(point2) - sqrt3 * key
-							* crawl_radius) < 1e-6) {
-						double tem_radius = calculateIncircle(point, avqp,
-								avqp1);
-						minRadius = Math.min(minRadius, tem_radius);
-					}
-
-				}
-			}
-			coverRadius = minRadius;
-			temp_Level++;
+         //record all the circles which intersect with the hexagon
+		LinkedList<VQP>intersectwithHex=new LinkedList<VQP>();
+		VQP hex=new VQP(firstVqp.getCoordinate(), radius*key);
+		Iterator<VQP> it=visitedcircle_Queue.iterator();
+		while(it.hasNext()){
+			VQP vqp1=it.next();
+			if(circles_Insecter(hex, vqp1))
+				intersectwithHex.add(vqp1);
 		}
+		//issue the first level query
+		for(int i=0; i<unvisited_Queue.size();i++){
+			Coordinate p=unvisited_Queue.get(i);
+			VQP vqp=new VQP(p, firstVqp.getRadius());
+			if(needQuery(vqp, visitedcircle_Queue, envelopeState)){
+				AQuery aquery=new AQuery(p, state,category, query, MAX_TOTAL_RESULTS_RETURNED);
+				ResultSetD2 result=query(aquery);
+				countquery++;
+				queryset.addAll(result.getPOIs());
+				int size=result.getPOIs().size();
+				double pr=p.distance(result.getPOIs().get(size-1).getCoordinate());
+				visitedcircle_Queue.addLast(new VQP(p, pr));
+				visitedsamelevel.add(new VQP(p, pr));
+			}
+			else{
+				visitedsamelevel.add(vqp);
+				visitedcircle_Queue.addLast(vqp);
+			}
+		}
+	    //hole detection
 		return coverRadius;
 	}
 
