@@ -290,7 +290,7 @@ public abstract class Strategy {
 					APOI aPOI = Strategy.dbInMemory.pois.get(poiID);
 					double longitude = aPOI.getCoordinate().x;
 					double latitude = aPOI.getCoordinate().y;
-					logger.info(poiID + ": " + times + ", " + "[" + longitude + ", " + latitude + "]");
+				//	logger.info(poiID + ": " + times + ", " + "[" + longitude + ", " + latitude + "]");
 				  }
 		return Strategy.countNumQueries;
 	}

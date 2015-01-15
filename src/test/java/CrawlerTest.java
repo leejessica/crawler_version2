@@ -17,6 +17,7 @@ import mo.umac.crawler.Binary_estimateR;
 import mo.umac.crawler.Binary_wholeSpace;
 import mo.umac.crawler.Hexagon;
 import mo.umac.crawler.Hexagon_optimize;
+import mo.umac.crawler.Hexagon_opyimize_1;
 import mo.umac.crawler.MainYahoo;
 import mo.umac.crawler.PeripheryQuery;
 import mo.umac.crawler.Periphery_Optimize;
@@ -50,7 +51,7 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		CrawlerTest test = new CrawlerTest();
 		PaintShapes.painting = false;
-	//	WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
+//		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		//Coordinate startPoint=new Coordinate();
 		test.calling();
 
@@ -78,12 +79,14 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		startPoint.x=(envelopeECEF.getMinX()+envelopeECEF.getMaxX())/2;
 		startPoint.y=(envelopeECEF.getMinY()+envelopeECEF.getMaxY())/2;
 		Hexagon_optimize crawler=new Hexagon_optimize();
+//		Hexagon_opyimize_1 crawler=new Hexagon_opyimize_1();
 		//
-		String testSource = "../crawler-data/yahoolocal-h2/test/source";
-		String testTarget = "../crawler-data/yahoolocal-h2/test/target";
+		
+		String testSource = "../crawler-data/yahoolocal-h2/source";
+		String testTarget = "../crawler-data/yahoolocal-h2/target";
 		//
 		int numItems = 1000;
-		int topK = 15;
+		int topK = 10;
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 		//
 		Strategy.categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
@@ -91,7 +94,7 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		// source database
 		Strategy.dbExternal = new H2DB(testSource, testTarget);
 		// generate dataset
-		// List<Coordinate> points = generateSimpleCase(testSource, category, state, numItems);
+		//List<Coordinate> points = generateSimpleCase(testSource, category, state, numItems);
 		//exportToH2(points, testSource, category, state);
 		//
 		Strategy.dbInMemory = new DBInMemory();

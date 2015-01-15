@@ -75,7 +75,7 @@ public class MainYahoo {
 	public static void main(String[] args) {
 		/************************* Change these lines *************************/
 		debug = false;
-		PaintShapes.painting = false;
+		PaintShapes.painting = true;
 		initForServer(false);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		shutdownLogs(MainYahoo.debug);
@@ -101,6 +101,7 @@ public class MainYahoo {
 		startPoint.x=-76.7700405;
 		startPoint.y= 42.746632;
 		Strategy crawlerStrategy=new Hexagon_optimize();
+//		Strategy crawlerStrategy=new Hexagon_opyimize_1();
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 		//AlgoPartition.mbrList.add(envelope);
 		Context crawlerContext = new Context(crawlerStrategy);
