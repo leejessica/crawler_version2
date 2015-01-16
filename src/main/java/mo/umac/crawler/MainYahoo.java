@@ -93,13 +93,14 @@ public class MainYahoo {
 
 	public static void testing() {
 		//Strategy crawlerStrategy = new AlgoPartition();
-		//Strategy crawlerStrategy=new AlgoSlice();
+//		Strategy crawlerStrategy=new AlgoSlice();
 		Coordinate p=new Coordinate();
 		p.x=-76;
 		p.y=43;
 		Coordinate startPoint=new Coordinate();
 		startPoint.x=-76.7700405;
 		startPoint.y= 42.746632;
+//		Strategy crawlerStrategy=new Hexagon();
 		Strategy crawlerStrategy=new Hexagon_optimize();
 //		Strategy crawlerStrategy=new Hexagon_opyimize_1();
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
