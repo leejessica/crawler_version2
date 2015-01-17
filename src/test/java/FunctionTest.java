@@ -60,9 +60,31 @@ public class FunctionTest extends Strategy{
 		Coordinate point=new Coordinate(-73.72273322396315, 43.43986955534226);
 		double crawl_radius=0.10547792595767536;
 		System.out.println("visitedInfo.size="+visitedInfo.size());
-        Hexagon_optimize crawler=new Hexagon_optimize();
-        double coverradius=calculateIncircle(point, crawl_radius, visitedInfo);
-        System.out.println("coverradius="+coverradius);
+		//test the visitedInfo
+		for(int i=0;i<visitedInfo.size()-1;i++){
+			VQP circle1=visitedInfo.get(i);			
+			for(int j=i+1;j<visitedInfo.size();j++){
+				VQP circle2=visitedInfo.get(j);
+				if(Math.abs(circle1.getCoordinate().distance(circle2.getCoordinate())-0.97*crawl_radius*Math.sqrt(3))<1e-6){
+					double dd1=circle1.getCoordinate().distance(circle2.getCoordinate());
+					double dd2=circle1.getRadius()+circle2.getRadius();
+					double dd3=Math.abs(circle1.getRadius()-circle2.getRadius());
+					System.out.println("circle1="+circle1.getCoordinate().toString());
+					System.out.println("circle2="+circle2.getCoordinate().toString());
+					System.out.println("dd1="+dd1+"   dd2="+dd2+"   dd3="+dd3);
+					System.out.println("================================");
+					
+				}
+			   
+			}
+		}
+		
+		
+		
+		
+ //       Hexagon_optimize crawler=new Hexagon_optimize();
+      //  double coverradius=calculateIncircle(point, crawl_radius, visitedInfo);
+      //  System.out.println("coverradius="+coverradius);
  
 
         System.out.println("end calling!");
