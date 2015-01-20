@@ -41,7 +41,7 @@ public class Hexagon extends Strategy {
 	private static Set<APOI> queryset = new HashSet<APOI>(); 
 	private static Set<APOI> eligibleset = new HashSet<APOI>();
 	// record all visited query points
-	private static LinkedList<Coordinate> visited_Queue1 = new LinkedList<Coordinate>();
+	private static Set<Coordinate> visited_Queue1 = new HashSet<Coordinate>();
 
 	public Hexagon() {
 		super();
@@ -72,7 +72,7 @@ public class Hexagon extends Strategy {
 	}
 
 	public void calculatePoint(Coordinate startPoint, double radius,
-			LinkedList<Coordinate> visited_Queue1,
+			Set<Coordinate> visited_Queue1,
 			LinkedList<Coordinate> unvisited_Queue) {
 		Coordinate[] d = new Coordinate[6];
 		for (int i = 0; i < d.length; i++) {
@@ -91,24 +91,34 @@ public class Hexagon extends Strategy {
 		d[5].x = startPoint.x - 3 * radius * key / 2;
 		d[5].y = startPoint.y + sqrt3 * radius * key / 2;
 		for (int i = 0; i < 6; i++) {
-			if (!myContain(visited_Queue1, d[i])
-					&& !myContain(unvisited_Queue, d[i]))
+			if (!myContain2(visited_Queue1, d[i])
+					&& !myContain1(unvisited_Queue, d[i]))
 				unvisited_Queue.addLast(d[i]);
 		}
 	}
 
-	private boolean myContain(LinkedList<Coordinate> q, Coordinate c) {
-		for (int i = 0; i < q.size(); i++) {
-			Coordinate one = q.get(i);
-			if (Math.abs(one.x - c.x) < 1e-6
-					&& Math.abs(one.y - c.y) < 1e-6) {
-				return true;
+	private boolean myContain1(LinkedList<Coordinate> q, Coordinate c) {
+	       boolean flag=false;
+			for (int i = 0; i < q.size()&&!flag; i++) {
+				Coordinate one = q.get(i);
+				if (Math.abs(one.x-c.x)<1e-6&&Math.abs(one.y-c.y)<1e-6) {
+					 flag=true;
+				}
 			}
+			return flag;
 		}
 
-		return false;
+	private boolean myContain2(Set<Coordinate> q, Coordinate c) {
+        boolean flag=false;
+		Iterator<Coordinate>it=q.iterator();
+		while(it.hasNext()){
+			Coordinate one=it.next();
+			if (Math.abs(one.x-c.x)<1e-6&&Math.abs(one.y-c.y)<1e-6) {
+				 flag=true;
+			}
+		}
+		return flag;
 	}
-
 	public void ununiformlyquery(Coordinate startPoint, String state, int category,String query) {
 
 		// record points for next round query
@@ -119,7 +129,7 @@ public class Hexagon extends Strategy {
 
 		ResultSetD2 resultSetStart = query(Firstquery);
 		countquery++;
-		visited_Queue1.addLast(startPoint);
+		visited_Queue1.add(startPoint);
 		
 		queryset.addAll(resultSetStart.getPOIs()); // put all points gotten from
 													// querying into a set
@@ -164,6 +174,7 @@ public class Hexagon extends Strategy {
 					Coordinate farthest1Coordinate = farthest1.getCoordinate();
 					double distance1 = p.distance(farthest1Coordinate);
 					double crawl_radius = distance1;
+					visited_Queue1.add(p);
 					if (crawl_radius < radius * key) {
 						crawl_radius = queryInHexgon(p, crawl_radius, radius, state, category, query);								
 					}
@@ -174,9 +185,8 @@ public class Hexagon extends Strategy {
 						PaintShapes.paint.myRepaint();
 					}
 					VQP visitedPoint = new VQP(p, crawl_radius);
-					// denote the point has been visited
 					visited_Queue.addLast(visitedPoint);
-					visited_Queue1.addLast(p);
+					
 				}
 			}
 			double coverRadius = calculateIncircle(startPoint, radius, visited_Queue);
@@ -218,7 +228,6 @@ public class Hexagon extends Strategy {
 		LinkedList<VQP>visited_Queue=new LinkedList<VQP>();
         LinkedList<Coordinate>unvisited_Queue=new LinkedList<Coordinate>();
 		double coverRadius = crawl_radius;
-		visited_Queue1.addLast(point);
 		/* compute coordinates of the points which are used to next query */
 		calculatePoint(point, crawl_radius, visited_Queue1, unvisited_Queue);
 		Circle circle = new Circle(point, coverRadius);
@@ -249,6 +258,7 @@ public class Hexagon extends Strategy {
 					Coordinate farthestCoordinate = farthest.getCoordinate();
 					double distance = q.distance(farthestCoordinate);
 					double inRadius = distance;
+					visited_Queue1.add(q);
 					if (inRadius < key * crawl_radius) {
 						inRadius = queryInHexgon(q, inRadius, crawl_radius,
 								 state, category, query);
@@ -261,7 +271,6 @@ public class Hexagon extends Strategy {
 					}
 					VQP qVQP = new VQP(q, inRadius);
 					visited_Queue.addLast(qVQP);
-					visited_Queue1.addLast(q);
 				}
 			}
 
