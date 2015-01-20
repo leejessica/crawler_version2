@@ -56,6 +56,8 @@ public abstract class Strategy {
 	public static DBInMemory dbInMemory = null;
 
 	public static DBExternal dbExternal = null;
+	
+	public static int TOTAL_POINTS=0;
 
 	public static final double EPSILON = 0.00000001;
 
@@ -155,6 +157,7 @@ public abstract class Strategy {
 			Strategy.dbInMemory.poisCrawledTimes = new HashMap<Integer, Integer>();
 			Strategy.dbInMemory.readFromExtenalDB(category, state);
 			Strategy.dbInMemory.index();
+			TOTAL_POINTS=Strategy.dbInMemory.pois.size();
 			logger.info("There are in total " + Strategy.dbInMemory.pois.size() + " points.");
 			// target database
 			Strategy.dbExternal.createTables(MainYahoo.DB_NAME_TARGET);

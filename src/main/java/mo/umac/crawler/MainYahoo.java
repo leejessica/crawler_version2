@@ -103,6 +103,7 @@ public class MainYahoo {
 //		Strategy crawlerStrategy=new Hexagon();
 		Strategy crawlerStrategy=new Hexagon_optimize();
 //		Strategy crawlerStrategy=new Hexagon_opyimize_1();
+//		Strategy crawlerStrategy=new AlgoSlice();
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 		//AlgoPartition.mbrList.add(envelope);
 		Context crawlerContext = new Context(crawlerStrategy);
