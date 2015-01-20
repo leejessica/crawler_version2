@@ -33,7 +33,7 @@ public class Hexagon_optimize extends Strategy {
 	 * 
 	 */
 	// public static int recursion = 1;
-	public static int NEED_POINTS_NUMBER = 57600;
+	public static int NEED_POINTS_NUMBER = 200;
 	public static int countPoint = 0;
 	public static double sqrt3 = Math.sqrt(3);
 	public static double key = 0.97;
@@ -41,25 +41,19 @@ public class Hexagon_optimize extends Strategy {
 	
 	
 	private static Coordinate startPoint=new Coordinate();
-	
+	private static Set<APOI> queryset = new HashSet<APOI>(); 
+	private static Set<APOI> eligibleset = new HashSet<APOI>(); 
+	// @param visitedcircle_Queue: record the information(coordinate,radius)of the visited points
+	private static LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
 	public Hexagon_optimize() {
-		startPoint.x=-73.355835;
-		startPoint.y= 42.746632;
-//		startPoint.x=100;
-//		startPoint.y= 505;
+//		startPoint.x=-73.355835;
+//		startPoint.y= 42.746632;
+		startPoint.x=500;
+		startPoint.y= 500;
 		
 		logger.info("------------HexagonCrawler2_Modify------------");
 	}
 	
-	public Hexagon_optimize(Coordinate startPoint) {
-		//this.startPoint=startPoint;
-		this.startPoint.x=startPoint.x;
-		this.startPoint.y=startPoint.y;
-		System.out.println("startPoint="+startPoint.toString());
-		logger.info("------------HexagonCrawler2_Modify------------");
-	}
-	
-
 	@Override
 	public void crawl(String state, int category, String query,
 			Envelope envelopeState) {
@@ -74,16 +68,9 @@ public class Hexagon_optimize extends Strategy {
 		}
 		// Coordinate c = evenlopeState.centre();
 
-		// record points for next round query
-		LinkedList<VQP> visited_Queue = new LinkedList<VQP>();
-		// record all visited query points
-		// LinkedList<Coordinate> visited_Queue1 = new LinkedList<Coordinate>();
-		LinkedList<Coordinate> unvisited_Queue = new LinkedList<Coordinate>();
-		// @param visitedcircle_Queue: record the information(coordinate,
-		// radius)of the visited points
-		LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
-		ununiformlyquery(startPoint, envelopeState,visited_Queue, visitedcircle_Queue,
-				unvisited_Queue, state, category, query);
+		
+		
+		ununiformlyquery(startPoint, envelopeState, state, category, query);
 		logger.info("eligiblepoint="+countPoint);
 	}
 
@@ -106,8 +93,8 @@ public class Hexagon_optimize extends Strategy {
 		d[4].x = startPoint.x - 3 * radius * key / 2;
 		d[4].y = startPoint.y - sqrt3 * radius * key / 2;
 		d[5].x = startPoint.x - 3 * radius * key / 2;
-		d[5].y = startPoint.y + sqrt3 * radius * key / 2;
-
+		d[5].y = startPoint.y + sqrt3 * radius * key / 2;	
+		
 		for (int i = 0; i < 6; i++) {
 			if (!myContain2(visitedcircle_Queue, d[i])
 					&& !myContain1(unvisited_Queue, d[i]))
@@ -119,7 +106,7 @@ public class Hexagon_optimize extends Strategy {
        boolean flag=false;
 		for (int i = 0; i < q.size()&&!flag; i++) {
 			Coordinate one = q.get(i);
-			if (Math.abs(one.x - c.x) < 1e-6 && Math.abs(one.y - c.y) < 1e-6) {
+			if (Math.abs(one.x-c.x)<1e-6&&Math.abs(one.y-c.y)<1e-6) {
 				 flag=true;
 			}
 		}
@@ -130,7 +117,7 @@ public class Hexagon_optimize extends Strategy {
         boolean flag=false;
 		for (int i = 0; i < q.size()&&!flag; i++) {
 			Coordinate one = q.get(i).getCoordinate();
-			if (Math.abs(one.x - c.x) < 1e-6 && Math.abs(one.y - c.y) < 1e-6) {
+			if (Math.abs(one.x-c.x)<1e-6&&Math.abs(one.y-c.y)<1e-6) {
 				 flag=true;
 			}
 		}
@@ -150,17 +137,15 @@ public class Hexagon_optimize extends Strategy {
 	 * @param unvisited_Queue: record the points unvisited
 	 */
 	public void ununiformlyquery(Coordinate startPoint,Envelope envelopeState,
-			LinkedList<VQP> visited_Queue, LinkedList<VQP> visitedcircle_Queue,
-			LinkedList<Coordinate> unvisited_Queue, String state, int category,
-			String query) {
+			 String state, int category,String query) {
+		// record points for next round query
+		LinkedList<VQP> visited_Queue = new LinkedList<VQP>();
+	    LinkedList<Coordinate> unvisited_Queue = new LinkedList<Coordinate>();
         /*issue the first query*/
 		AQuery Firstquery = new AQuery(startPoint, state, category, query,
 				MAX_TOTAL_RESULTS_RETURNED); 
 		ResultSetD2 resultSetStart = query(Firstquery);
-		countquery++;
-		Set<APOI> queryset = new HashSet<APOI>(); // record all point queried
-		Set<APOI> eligibleset = new HashSet<APOI>(); // record all eligible  
-														// point
+		countquery++;		
 		queryset.addAll(resultSetStart.getPOIs()); 
 		countPoint = queryset.size(); 
 		int size = resultSetStart.getPOIs().size();
@@ -177,7 +162,6 @@ public class Hexagon_optimize extends Strategy {
 		}
 
 		double radius = distance; // record the first crawl radius
-        System.out.println("radius="+radius);
 		/* compute coordinates of the points which are used to next round query */
 		calculatePoint(startPoint, radius, visitedcircle_Queue, unvisited_Queue);
 		int level = 1;
@@ -199,16 +183,7 @@ public class Hexagon_optimize extends Strategy {
 						APOI farthest1 = resultSet.getPOIs().get(size1 - 1);
 						Coordinate farthest1Coordinate = farthest1.getCoordinate();
 						double distance1 = p.distance(farthest1Coordinate);
-						double crawl_radius = distance1;
-						//+++++++++++++++++++++++++++++++++++++++++++++++++++
-						try{
-							double crawl_radiustest=crawl_radius;
-							}
-						catch(NumberFormatException e){
-							System.out.println("crawl_radius="+crawl_radius);
-						}
-						
-						
+						double crawl_radius = distance1;																		
 						/*
 						 * record the information of the visited point，using to
 						 * record all the visited points since we want to using
@@ -218,12 +193,8 @@ public class Hexagon_optimize extends Strategy {
 						visitedcircle_Queue.addLast(new VQP(p, crawl_radius));
 						// query in the hexagon
 						if (crawl_radius < radius * key) {
-							LinkedList<VQP> temp_visited_Queue = new LinkedList<VQP>();
-							LinkedList<Coordinate> temp_unvisited_Queue = new LinkedList<Coordinate>();
 							crawl_radius = queryInHexagon(p, crawl_radius,envelopeState,
-									radius, temp_visited_Queue,
-									visitedcircle_Queue, temp_unvisited_Queue,
-									state, category, query, queryset);
+									radius, state, category, query);
 						}
 						Circle aaCircle = new Circle(p, crawl_radius);
 						if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -277,10 +248,10 @@ public class Hexagon_optimize extends Strategy {
 	 * @radius: the radius of the circle with the center of startPoint
 	 */
 	public double queryInHexagon(Coordinate point, double crawl_radius,Envelope envelopeState,
-			double radius, LinkedList<VQP> visited_Queue,
-			LinkedList<VQP> visitedcircle_Queue,
-			LinkedList<Coordinate> unvisited_Queue, String state, int category,
-			String query, Set<APOI> set) {
+			double radius, String state, int category,
+			String query) {
+		LinkedList<VQP>visited_Queue=new LinkedList<VQP>();
+		LinkedList<Coordinate>unvisited_Queue=new LinkedList<Coordinate>();
 		// @param coverRadius:record the maximum inscribed circle of the covered
 		// region
 		double coverRadius = crawl_radius;
@@ -315,23 +286,19 @@ public class Hexagon_optimize extends Strategy {
 								query, MAX_TOTAL_RESULTS_RETURNED);
 						ResultSetD2 resultSetInhexgon = query(InhexgonQuery);
 						countquery++;
-						set.addAll(resultSetInhexgon.getPOIs());
+					    queryset.addAll(resultSetInhexgon.getPOIs());
 						int size = resultSetInhexgon.getPOIs().size();
 						APOI farthest = resultSetInhexgon.getPOIs().get(
 								size - 1);
 						Coordinate farthestCoordinate = farthest
 								.getCoordinate();
-						double distance = q.distance(farthestCoordinate);
+						double distance =q.distance(farthestCoordinate);
 						double inRadius = distance;
 						visitedcircle_Queue.addLast(new VQP(q, inRadius));
 						// recursively call the InHexagon algorithm
-						if (inRadius < key * crawl_radius) {
-							LinkedList<VQP> temp_visited_Queue1 = new LinkedList<VQP>();
-							LinkedList<Coordinate> temp_unvisited_Queue1 = new LinkedList<Coordinate>();
+						if (inRadius < key * crawl_radius) {							
 							inRadius = queryInHexagon(q, inRadius,envelopeState,
-									crawl_radius, temp_visited_Queue1,
-									visitedcircle_Queue, temp_unvisited_Queue1,
-									state, category, query, set);
+									crawl_radius, state, category, query);
 						}
 						Circle aaaCircle = new Circle(q, inRadius);
 						if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -354,46 +321,6 @@ public class Hexagon_optimize extends Strategy {
 			temp_Level++;
 		}
 		return coverRadius;
-	}
-
-	public Set<VQP> obtainNeighborSet(VQP circle,
-			LinkedList<VQP> visitedcircle_Queue) {
-		Set Neighbor_set = new HashSet<VQP>();// record the effective neighbor
-		Set tempNeighbor_set = new HashSet<VQP>();
-		Iterator<VQP> it = visitedcircle_Queue.iterator();
-		// initial the tempNeighbor_set
-		while (it.hasNext()) {
-			VQP circle1 = it.next();
-			double d1 = circle.getRadius() - circle1.getRadius();
-			/*
-			 * 【 Definition 】temporary neighbor: the circle intersect with the
-			 * given circle or contained by the given circle
-			 */
-			if (circles_Insecter(circle, circle1)
-					|| (d1 > 0 && circle_contain(circle, circle1))) {
-				tempNeighbor_set.add(circle1);
-			}
-		}
-		/*
-		 * optimal the Neighbor_set and only retain the effective neighbors 【
-		 * Definition 】effective neighbors
-		 */
-		Iterator<VQP> it1 = tempNeighbor_set.iterator();
-		while (it1.hasNext()) {
-			VQP c1 = it1.next();
-			boolean effective = true;
-			Iterator<VQP> it2 = tempNeighbor_set.iterator();
-			while (it2.hasNext() && effective) {
-				VQP c2 = it2.next();
-				if (!pointsequal(c1.getCoordinate(), c2.getCoordinate())) {
-					if (circle_contain(c2, c1))
-						effective = false;
-				}
-			}
-			if (effective)
-				Neighbor_set.add(c1);
-		}
-		return Neighbor_set;
 	}
 
 	/*

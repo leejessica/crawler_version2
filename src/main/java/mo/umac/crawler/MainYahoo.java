@@ -100,8 +100,8 @@ public class MainYahoo {
 		Coordinate startPoint=new Coordinate();
 		startPoint.x=-76.7700405;
 		startPoint.y= 42.746632;
-//		Strategy crawlerStrategy=new Hexagon();
-		Strategy crawlerStrategy=new Hexagon_optimize();
+		Strategy crawlerStrategy=new Hexagon();
+//		Strategy crawlerStrategy=new Hexagon_optimize();
 //		Strategy crawlerStrategy=new Hexagon_opyimize_1();
 //		Strategy crawlerStrategy=new AlgoSlice();
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;

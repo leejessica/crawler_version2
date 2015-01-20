@@ -64,24 +64,17 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		// SliceCrawler crawler = new SliceCrawler();
 		// HexagonCrawler crawler = new HexagonCrawler();
 		//AlgoSlice crawler = new AlgoSlice();
-		//Hexagon crawler=new Hexagon();
 		
+		Hexagon crawler=new Hexagon();
 		//Binary_estimateR crawler=new Binary_estimateR();
 		//Binary_wholeSpace crawler=new Binary_wholeSpace();
 		//PeripheryQuery crawler=new PeripheryQuery();
 		//Periphery_Optimize crawler=new Periphery_Optimize();
-		//Hexagon_optimize crawler=new Hexagon_optimize(new Coordinate(-77,43));
+//		Hexagon_optimize crawler=new Hexagon_optimize();
 		String state = "NY";
 		int categoryID = 96926236;
 		String category = "Restaurants";
-		Envelope envelopeECEF = new Envelope(0, 1000, 0, 1000);
-		Coordinate startPoint=new Coordinate();
-		startPoint.x=(envelopeECEF.getMinX()+envelopeECEF.getMaxX())/2;
-		startPoint.y=(envelopeECEF.getMinY()+envelopeECEF.getMaxY())/2;
-		Hexagon_optimize crawler=new Hexagon_optimize();
-//		Hexagon_opyimize_1 crawler=new Hexagon_opyimize_1();
-		//
-		
+		Envelope envelopeECEF = new Envelope(0, 1000, 0, 1000);	
 		String testSource = "../crawler-data/yahoolocal-h2/source";
 		String testTarget = "../crawler-data/yahoolocal-h2/target";
 		//
