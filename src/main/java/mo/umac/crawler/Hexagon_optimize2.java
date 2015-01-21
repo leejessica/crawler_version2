@@ -26,6 +26,10 @@ import com.vividsolutions.jts.geom.Envelope;
 /**
  * @author Jessica
  * 
+ * This algorithm recursive partition the rectangle into 2 equal parts
+ *  to cover a regular rectangle which is the minimum regular rectangle 
+ *  of the uncovred hexagon
+ * 
  */
 public class Hexagon_optimize2 extends Strategy {
 
@@ -49,8 +53,8 @@ public class Hexagon_optimize2 extends Strategy {
 	public Hexagon_optimize2() {
 		startPoint.x = -73.355835;
 		startPoint.y = 42.746632;
-//		startPoint.x=500;
-//		startPoint.y= 500;
+//		 startPoint.x=500;
+//		 startPoint.y= 500;
 
 		logger.info("------------HexagonCrawler2_Modify------------");
 	}
@@ -193,7 +197,8 @@ public class Hexagon_optimize2 extends Strategy {
 						visitedcircle_Queue.add(new VQP(p, crawl_radius));
 						// query in the hexagon
 						if (crawl_radius < radius * key) {
-							crawl_radius = queryInHexagon(p, envelopeState, radius, state, category,query);
+							crawl_radius = queryInHexagon(p, envelopeState,
+									radius, state, category, query);
 						}
 						Circle aaCircle = new Circle(p, crawl_radius);
 						if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -213,8 +218,7 @@ public class Hexagon_optimize2 extends Strategy {
 				}
 			}
 			/* calculate the cover radius */
-			double coverRadius = calculateIncircle(startPoint, 
-					visited_Queue);
+			double coverRadius = calculateIncircle(startPoint, visited_Queue);
 			visited_Queue.clear();
 			Circle circle = new Circle(startPoint, coverRadius);
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -248,66 +252,73 @@ public class Hexagon_optimize2 extends Strategy {
 	 * 
 	 * @radius: the radius of the circle with the center of startPoint
 	 */
-	public double queryInHexagon(Coordinate point,Envelope envelopeState, double radius, String state, int category,
-			String query) {
-		LinkedList<VQP>visited_Queue=new LinkedList<VQP>();
-		//initial the rectangle
-		double R=radius*key;
-		Envelope envelope=new Envelope(point.x-R, point.x+R, point.y-R*sqrt3/2, point.y+R*sqrt3/2);
-		coverRectangle(envelope, envelopeState, state, category, query, visited_Queue);
-		//calculate the coverradius
-        double coverraidus=calculateIncircle(point, visited_Queue);
-        visited_Queue.clear();
-        return coverraidus;
+	public double queryInHexagon(Coordinate point, Envelope envelopeState,
+			double radius, String state, int category, String query) {
+		LinkedList<VQP> visited_Queue = new LinkedList<VQP>();
+		// initial the rectangle
+		double R = radius * key;
+		Envelope envelope = new Envelope(point.x - R, point.x + R, point.y - R, point.y + R );
+		coverRectangle(envelope, envelopeState, state, category, query,
+				visited_Queue);
+		// calculate the coverradius
+		double coverraidus = calculateIncircle(point, visited_Queue);
+		visited_Queue.clear();
+		return coverraidus;
 	}
-	
-	
-	public void coverRectangle(Envelope envelope,Envelope envelopeState, String state, int category, String query,LinkedList<VQP>visited_Queue){
-		
-		Envelope e[]=partionEnvelop(envelope);
-	    for(int i=0;i<2;i++){
-	    	//rectangle is intersect with envelopeState
-	    	Coordinate p1=new Coordinate();
-	        p1.x=(e[i].getMinX()+e[i].getMaxX())/2;
-	        p1.y=(e[i].getMinY()+e[i].getMaxY())/2;
-	        Coordinate p2=new Coordinate(e[i].getMinX(), e[i].getMinY());
-	        double needradius=p1.distance(p2);
-	        if(e[i].intersects(envelopeState)){	        	
-		        AQuery Firstquery = new AQuery(p1, state, category, query,
-		    				MAX_TOTAL_RESULTS_RETURNED);
-		    	ResultSetD2 resultSetStart = query(Firstquery);
-		    	countquery++;
-		    	queryset.addAll(resultSetStart.getPOIs());
-		    	int size = resultSetStart.getPOIs().size();
-		    	APOI farthest = resultSetStart.getPOIs().get(size - 1);
-		    	double radius = p1.distance(farthest.getCoordinate());
-		    	visitedcircle_Queue.add(new VQP(p1, radius));
-		    	
-		    	if(needradius>radius){
-		           coverRectangle(e[i], envelopeState, state, category, query, visited_Queue);
-		    	}
-		    	else visited_Queue.add(new VQP(p1, radius));	    	
-		     }
-	        else{
-	        	visitedcircle_Queue.add(new VQP(p1, needradius));
-	        	visited_Queue.add(new VQP(p1, needradius));
-	        }
-	    }
-	}
-	
-	public Envelope[] partionEnvelop(Envelope envelop){
-		Envelope []e=new Envelope[2];
-		double width=envelop.getWidth();//maxX-minX
-		double height=envelop.getHeight();
-		if(width>height){
-			double midX=(envelop.getMaxX()+envelop.getMinX())/2;
-			e[0]=new Envelope(envelop.getMinX(), midX, envelop.getMinY(), envelop.getMaxY());
-			e[1]=new Envelope(midX, envelop.getMaxX(), envelop.getMinY(), envelop.getMaxY());
+
+	public void coverRectangle(Envelope envelope, Envelope envelopeState,
+			String state, int category, String query,
+			LinkedList<VQP> visited_Queue) {
+
+		Envelope e[] = partitionEnvelope(envelope);
+		for (int i = 0; i < 2; i++) {
+			// rectangle is intersect with envelopeState
+			Coordinate p1 = new Coordinate();
+			p1.x = (e[i].getMinX() + e[i].getMaxX()) / 2;
+			p1.y = (e[i].getMinY() + e[i].getMaxY()) / 2;
+			Coordinate p2 = new Coordinate(e[i].getMinX(), e[i].getMinY());
+			double needradius = p1.distance(p2);
+			if (e[i].intersects(envelopeState)) {
+				AQuery Firstquery = new AQuery(p1, state, category, query,
+						MAX_TOTAL_RESULTS_RETURNED);
+				ResultSetD2 resultSetStart = query(Firstquery);
+				countquery++;
+				queryset.addAll(resultSetStart.getPOIs());
+				int size = resultSetStart.getPOIs().size();
+				APOI farthest = resultSetStart.getPOIs().get(size - 1);
+				double radius = p1.distance(farthest.getCoordinate());
+				visitedcircle_Queue.add(new VQP(p1, radius));
+
+				if (needradius > radius) {
+					coverRectangle(e[i], envelopeState, state, category, query,
+							visited_Queue);
+				} else
+					visited_Queue.add(new VQP(p1, radius));
+			}
+			//e[i] is out of the data space, no need query
+			else {
+				visitedcircle_Queue.add(new VQP(p1, needradius));
+				visited_Queue.add(new VQP(p1, needradius));
+			}
 		}
-		else{
-			double  midY=(envelop.getMinY()+envelop.getMaxY())/2;
-			e[0]=new Envelope(envelop.getMinX(), envelop.getMaxX(), envelop.getMinY(), midY);
-			e[1]=new Envelope(envelop.getMinX(), envelop.getMaxX(), midY, envelop.getMaxY());
+	}
+
+	public Envelope[] partitionEnvelope(Envelope envelop) {
+		Envelope[] e = new Envelope[2];
+		double width = envelop.getWidth();// maxX-minX
+		double height = envelop.getHeight();
+		if (width >= height) {
+			double midX = (envelop.getMaxX() + envelop.getMinX()) / 2;
+			e[0] = new Envelope(envelop.getMinX(), midX, envelop.getMinY(),
+					envelop.getMaxY());
+			e[1] = new Envelope(midX, envelop.getMaxX(), envelop.getMinY(),
+					envelop.getMaxY());
+		} else {
+			double midY = (envelop.getMinY() + envelop.getMaxY()) / 2;
+			e[0] = new Envelope(envelop.getMinX(), envelop.getMaxX(),
+					envelop.getMinY(), midY);
+			e[1] = new Envelope(envelop.getMinX(), envelop.getMaxX(), midY,
+					envelop.getMaxY());
 		}
 		return e;
 	}
@@ -315,7 +326,8 @@ public class Hexagon_optimize2 extends Strategy {
 	/*
 	 * algorithm 1 To calculate the maximum inscribed circle of a given area
 	 */
-	public double calculateIncircle(Coordinate startPoint, LinkedList<VQP> visitedcircle_Queue) {
+	public double calculateIncircle(Coordinate startPoint,
+			LinkedList<VQP> visitedcircle_Queue) {
 		double minRadius = 1e308;
 		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {
 			VQP circle1 = visitedcircle_Queue.get(i);

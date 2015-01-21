@@ -18,6 +18,8 @@ import mo.umac.crawler.Binary_wholeSpace;
 import mo.umac.crawler.Hexagon;
 import mo.umac.crawler.Hexagon_optimize;
 import mo.umac.crawler.Hexagon_optimize2;
+import mo.umac.crawler.Hexagon_optimize3;
+import mo.umac.crawler.Hexagon_optimize4;
 import mo.umac.crawler.MainYahoo;
 import mo.umac.crawler.PeripheryQuery;
 import mo.umac.crawler.Periphery_Optimize;
@@ -71,7 +73,10 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		//PeripheryQuery crawler=new PeripheryQuery();
 		//Periphery_Optimize crawler=new Periphery_Optimize();
 //		Hexagon_optimize crawler=new Hexagon_optimize();
-		Hexagon_optimize2 crawler=new Hexagon_optimize2();
+//		Hexagon_optimize2 crawler=new Hexagon_optimize2();
+//		Hexagon_optimize4 crawler=new Hexagon_optimize4();
+		Hexagon_optimize3 crawler=new Hexagon_optimize3();
+		
 		String state = "NY";
 		int categoryID = 96926236;
 		String category = "Restaurants";

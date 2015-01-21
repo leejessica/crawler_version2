@@ -96,7 +96,10 @@ public class MainYahoo {
 //		Strategy crawlerStrategy=new AlgoSlice();
 //		Strategy crawlerStrategy=new Hexagon();
 //		Strategy crawlerStrategy=new Hexagon_optimize();
-        Strategy crawlerStrategy=new Hexagon_optimize2();
+//        Strategy crawlerStrategy=new Hexagon_optimize2();
+//		Strategy crawlerStrategy=new Hexagon_optimize3();
+//		Strategy crawlerStrategy=new Hexagon_optimize4();
+		Strategy crawlerStrategy=new Hexagon_optimize5();
 //		Strategy crawlerStrategy=new AlgoSlice();
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 		//AlgoPartition.mbrList.add(envelope);

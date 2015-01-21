@@ -548,7 +548,7 @@ public class Periphery_Optimize extends Strategy{
 		IntersectPoint intersect = new IntersectPoint();
 		if (Math.abs(Xc - Xd) < 1e-6 && Math.abs(Yc - Yd) < 1e-6) {
 			Coordinate intersectP1 = new Coordinate(Xc, Yc);
-			intersect = new IntersectPoint(p1, r1, p2, r2, intersectP1, null);
+			intersect = new IntersectPoint(p1, r1, p2, r2, intersectP1, intersectP1);
 		} else {
 			Coordinate intersectP1 = new Coordinate(Xc, Yc);
 			Coordinate intersectP2 = new Coordinate(Xd, Yd);
