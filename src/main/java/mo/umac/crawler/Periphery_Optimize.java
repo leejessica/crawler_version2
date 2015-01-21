@@ -28,7 +28,7 @@ public class Periphery_Optimize extends Strategy{
 	//private Coordinate startPoint=new Coordinate();
 	
 	public static int countquery=0;
-	public static int NEED_POINTS_NUM=17;
+	public static int NEED_POINTS_NUM=1000;
 	public static int countpoint=0;
 	public static int level=0;
 	public static Set<APOI> queryset = new HashSet<APOI>();// record all points queried
@@ -68,8 +68,8 @@ public class Periphery_Optimize extends Strategy{
 		//TODO visitedQ
 		LinkedList<Coordinate> visitedQ=new LinkedList<Coordinate>();
 		startQuery(startPoint,state,category,query,visitedQ);
-		 System.out.println("eligiblepoint="+countpoint);
-		 System.out.println("2====countquery="+countquery);
+	    logger.info("eligiblepoint="+countpoint);
+		
 	}
 	
 	public void startQuery(Coordinate startPoint, String state, int category,
