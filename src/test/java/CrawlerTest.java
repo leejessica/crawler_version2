@@ -65,13 +65,13 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		// HexagonCrawler crawler = new HexagonCrawler();
 		//AlgoSlice crawler = new AlgoSlice();
 		
-		Hexagon crawler=new Hexagon();
+//		Hexagon crawler=new Hexagon();
 		//Binary_estimateR crawler=new Binary_estimateR();
 		//Binary_wholeSpace crawler=new Binary_wholeSpace();
 		//PeripheryQuery crawler=new PeripheryQuery();
 //		Periphery_Optimize crawler=new Periphery_Optimize();
 //	    Periphery_Optimize2 crawler=new Periphery_Optimize2();	
-//		Hexagon_optimize crawler=new Hexagon_optimize();
+		Hexagon_optimize crawler=new Hexagon_optimize();
 //		Hexagon_optimize2 crawler=new Hexagon_optimize2();
 //		Hexagon_optimize4 crawler=new Hexagon_optimize4();
 //		Hexagon_optimize3 crawler=new Hexagon_optimize3();
@@ -84,7 +84,7 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		String testTarget = "../crawler-data/yahoolocal-h2/target";
 		//
 		int numItems = 1000;
-		int topK = 10;
+		int topK = 15;
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 		//
 		Strategy.categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);

@@ -26,9 +26,9 @@ import com.vividsolutions.jts.geom.Envelope;
 /**
  * @author Jessica
  * 
- * This algorithm recursive call the queryInHexagon function to cover the hexagon which
- *  cannot be covered by a single query,and needQuery function also be called to test 
- *  whether a query is need or not
+ *         This algorithm recursive call the queryInHexagon function to cover
+ *         the hexagon which cannot be covered by a single query,and needQuery
+ *         function also be called to test whether a query is need or not
  */
 public class Hexagon_optimize extends Strategy {
 
@@ -39,7 +39,7 @@ public class Hexagon_optimize extends Strategy {
 	public static int NEED_POINTS_NUMBER = 100;
 	public static int countPoint = 0;
 	public static double sqrt3 = Math.sqrt(3);
-	public static double key = 0.97;
+	public static double key = 0.9;
 	public static int countquery = 0;
 
 	private static Coordinate startPoint = new Coordinate();
@@ -50,10 +50,10 @@ public class Hexagon_optimize extends Strategy {
 	private static Set<VQP> visitedcircle_Queue = new HashSet<VQP>();
 
 	public Hexagon_optimize() {
-//		startPoint.x = -73.355835;
-//		startPoint.y = 42.746632;
-		 startPoint.x=500;
-		 startPoint.y= 500;
+		// startPoint.x = -73.355835;
+		// startPoint.y = 42.746632;
+		startPoint.x = 500;
+		startPoint.y = 500;
 
 		logger.info("------------Hexagon_optimize------------");
 	}
@@ -164,6 +164,7 @@ public class Hexagon_optimize extends Strategy {
 		}
 
 		double radius = distance; // record the first crawl radius
+		logger.info("the first query radius=" + radius);
 		/* compute coordinates of the points which are used to next round query */
 		calculatePoint(startPoint, radius, visitedcircle_Queue, unvisited_Queue);
 		int level = 1;
@@ -218,8 +219,7 @@ public class Hexagon_optimize extends Strategy {
 				}
 			}
 			/* calculate the cover radius */
-			double coverRadius = calculateIncircle(startPoint, radius,
-					visited_Queue);
+			double coverRadius = calculateIncircle(startPoint,radius, visited_Queue);
 			visited_Queue.clear();
 			Circle circle = new Circle(startPoint, coverRadius);
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -230,6 +230,8 @@ public class Hexagon_optimize extends Strategy {
 
 			// compute the number of eligible point
 			Iterator<APOI> it = queryset.iterator();
+			logger.info("queryset=" + queryset.size());
+			logger.info("coverRadius=" + coverRadius);
 			while (it.hasNext()) {
 				int id = it.next().getId();
 				APOI pp = DBInMemory.pois.get(id);
@@ -239,7 +241,7 @@ public class Hexagon_optimize extends Strategy {
 			countPoint = eligibleset.size();
 			logger.info("eliglible point during the query=" + countPoint
 					+ "  level=" + level);
-			logger.info("countquery="+countquery);
+			logger.info("countquery=" + countquery);
 			if (countPoint == Strategy.TOTAL_POINTS) {
 				logger.info("We can only find " + TOTAL_POINTS + "points!");
 				break;
@@ -364,6 +366,9 @@ public class Hexagon_optimize extends Strategy {
 						temP = inter.getIntersectPoint_right();
 					// test if the temP is inside another circle
 					boolean in = false;
+					VQP firstcircle=new VQP(startPoint, radius);
+					if(isinCircle(temP, firstcircle))
+						in=true;
 					Iterator<VQP> it = visitedcircle_Queue.iterator();
 					while (it.hasNext() && !in) {
 						VQP circle3 = it.next();

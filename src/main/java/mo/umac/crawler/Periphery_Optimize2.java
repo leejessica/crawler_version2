@@ -29,7 +29,7 @@ public class Periphery_Optimize2 extends Strategy{
 	//private Coordinate startPoint=new Coordinate();
 	
 	public static int countquery=0;
-	public static int NEED_POINTS_NUM=1000;
+	public static int NEED_POINTS_NUM=57584;
 	public static int countPoint=0;
 	public static int level=0;
 	public static Coordinate startPoint=new Coordinate();
@@ -40,6 +40,8 @@ public class Periphery_Optimize2 extends Strategy{
 	private static Set<APOI> eligibleset= new HashSet<APOI>(); //record all eligible points
 	private static LinkedHashSet<VQP> visitedcircle_Queue=new LinkedHashSet<VQP>();//record all the query circle
 	private static Coordinate levelstartPoint=new Coordinate();//record the start point of every level 
+	
+	private static double firstradius=0; 
 	
 	
 	public Periphery_Optimize2() {
@@ -83,7 +85,8 @@ public class Periphery_Optimize2 extends Strategy{
 		int size = resultSetStart.getPOIs().size();
 		APOI farthest = resultSetStart.getPOIs().get(size - 1);
 		Coordinate farthestCoordinate = farthest.getCoordinate();
-		inRadius = startPoint.distance(farthestCoordinate);
+		firstradius = startPoint.distance(farthestCoordinate);
+		inRadius=firstradius;
 		visitedcircle_Queue.add(new VQP(startPoint, inRadius));
 		//
 		Circle aCircle = new Circle(startPoint, inRadius);
@@ -98,7 +101,9 @@ public class Periphery_Optimize2 extends Strategy{
         LinkedList<VQP> visited_Queue=new LinkedList<VQP>();
         if(countPoint<NEED_POINTS_NUM){
         	onelevelQuery(state, category, query, visited_Queue);
+            logger.info("countPoint="+countPoint+"  countquery="+countquery);
         }
+        int k=1;
         while(countPoint<NEED_POINTS_NUM){
         	AQuery continuequery=new AQuery(levelstartPoint, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
         	ResultSetD2 continueresult=query(continuequery);
@@ -114,7 +119,7 @@ public class Periphery_Optimize2 extends Strategy{
     			PaintShapes.paint.addCircle(aaaCircle);
     			PaintShapes.paint.myRepaint();
     		}
-        	inRadius=calculateIncircle(startPoint, visited_Queue);
+        	inRadius=calculateIncircle(startPoint,firstradius, visited_Queue);
         	Iterator<APOI>iterator=queryset.iterator();
         	while(iterator.hasNext()){
         		APOI continueAPOI=iterator.next();
@@ -128,6 +133,8 @@ public class Periphery_Optimize2 extends Strategy{
     			PaintShapes.paint.addCircle(aaCircle);
     			PaintShapes.paint.myRepaint();
     		}
+    		System.out.println("k="+k);
+    		k++;
         }
         
 	}
@@ -288,7 +295,7 @@ public class Periphery_Optimize2 extends Strategy{
 				}
 			}
 		}
-		inRadius=calculateIncircle(startPoint, visited_Queue);
+		inRadius=calculateIncircle(startPoint, firstradius, visited_Queue);
 		Circle Circle11 = new Circle(startPoint, inRadius);
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
 			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
@@ -431,7 +438,7 @@ public class Periphery_Optimize2 extends Strategy{
 		return flag;
 	}
 	
-	public double calculateIncircle(Coordinate startPoint,
+	public double calculateIncircle(Coordinate startPoint,double radius,
 			LinkedList<VQP> visitedcircle_Queue) {
 		Coordinate s=new Coordinate();
 		double minRadius = 1e308;
@@ -462,6 +469,9 @@ public class Periphery_Optimize2 extends Strategy{
 						temP = inter.getIntersectPoint_right();
 					// test if the temP is inside another circle
 					boolean in = false;
+					VQP firstcircle=new VQP(startPoint, radius);
+					if(isinCircle(temP, firstcircle))
+						in=true;
 					Iterator<VQP> it = visitedcircle_Queue.iterator();
 					while (it.hasNext() && !in) {
 						VQP circle3 = it.next();

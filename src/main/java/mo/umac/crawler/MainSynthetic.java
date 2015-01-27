@@ -32,17 +32,13 @@ public class MainSynthetic extends Strategy {
 
 	private static String source = "../data-experiment/synthetic/2d-uniform/10000";
 	private static String target = "../data-experiment/synthetic/target";
-	private static int n = 10000;
+	private static int n = 1000;
 	private int topK = 15;
 	private static Envelope envelope = new Envelope(0, 1000, 0, 1000);
 	private static String state = "NY";
 	private static int categoryID = 96926236;
 	private static String category = "Restaurants";
-	// partition
-	private static double granularityX = 10;
-	private static double granularityY = 10;
-	private static String densityFile = "../data-experiment/densityfile.txt";
-	private static String clusterRegionFile = "../data-experiment/partition/synthetic-0.3.mbr";
+	
 
 	/**
 	 * @param args
@@ -57,20 +53,10 @@ public class MainSynthetic extends Strategy {
 			WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		}
 		Strategy.dbExternal = new H2DB(source, target);
-//		 test.generateData();
+//		test.generateData();
 		if (PaintShapes.painting) {
 			test.drawDataPoints();
 		}
-
-		// test.partition();
-		// if (PaintShapes.painting) {
-		// test.drawRectangles();
-		// }
-
-		// for testing
-		// WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
-
-		// test.generateData();
 		test.crawling();
 		Strategy.endData();
 
@@ -96,82 +82,18 @@ public class MainSynthetic extends Strategy {
 		PaintShapes.paint.myRepaint();
 	}
 
-	public void drawRectangles() {
-		ArrayList<Envelope> list = USDensity.readPartition(clusterRegionFile);
-		for (int i = 0; i < list.size(); i++) {
-			Envelope e = list.get(i);
-			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			PaintShapes.paint.addRectangle(e);
-			PaintShapes.paint.myRepaint();
-		}
-		// PaintShapes.paint.myRepaint();
-	}
 
-	public void partition() {
-		HashMap<Integer, APOI> pois = readFromGeneratedDB(source);
-		double[][] density1 = densityList(envelope, granularityX, granularityY,
-				pois);
-		USDensity.writeDensityToFile(density1, densityFile);
-		/** End */
-
-		/** cluster the regions, and then write to file */
-		ArrayList<double[]> density = USDensity
-				.readDensityFromFile(densityFile);
-		double a = 0.9;
-		ArrayList<Envelope> testRegions = new ArrayList<Envelope>();
-		// for (a = 0.5; a < 1; a = a + 0.1) {
-		Envelope denseRegion = Cluster.cluster(granularityX, granularityY,
-				envelope, density, a);
-		ArrayList<Envelope> list = Cluster.partition(envelope, denseRegion);
-		testRegions.addAll(list);
-		// }
-		logger.info("finished");
-		USDensity.writePartition(clusterRegionFile, testRegions);
-	}
-
-	public double[][] densityList(Envelope envelope, double granularityX,
-			double granularityY, HashMap<Integer, APOI> pois) {
-		logger.info("-------------computing unit density-------------");
-		double width = envelope.getWidth();
-		double height = envelope.getHeight();
-		double minX = envelope.getMinX();
-		double minY = envelope.getMinY();
-
-		// the number of grids, begin from 0;
-		int countX = (int) Math.ceil(width / granularityX);
-		int countY = (int) Math.ceil(height / granularityY);
-		logger.info("countX = " + countX);
-		logger.info("countY = " + countY);
-		// initialize to 0.0;
-		double[][] density = new double[countX][countY];
-		Iterator it = (Iterator) pois.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			APOI p = (APOI) entry.getValue();
-			double x = p.getLongitude();
-			double y = p.getLatitude();
-			int pGridX = (int) Math.floor((Math.abs(x - minX) / granularityX));
-			int pGridY = (int) Math.floor((Math.abs(y - minY) / granularityY));
-			density[pGridX][pGridY]++;
-		}
-		return density;
-	}
 
 	public void crawling() {
 		/************************* Change these lines *************************/
 		Strategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 		/** switch algorithms */
-		// AlgoSlice crawler = new AlgoSlice();
-		//AlgoProjection crawler = new AlgoProjection();
+		
 		//Hexagon crawler=new Hexagon();
-		Hexagon_optimize crawler=new Hexagon_optimize();
-//		Hexagon_optimize4 crawler=new Hexagon_optimize4();
+//		Hexagon_optimize crawler=new Hexagon_optimize();
 //		Periphery_Optimize2 crawler=new Periphery_Optimize2();
-		//PeripheryQuery crawler=new PeripheryQuery();
-		// AlgoPartition crawler = new AlgoPartition();
-		// AlgoPartition.clusterRegionFile = clusterRegionFile;
-		// AlgoDCDT crawler = new AlgoDCDT();
-		// AlgoDCDT.outerPoint = new Coordinate(-100, -100);
+		//Periphery_Optimize crawler=new Periphery_Optimize();
+		Hexagon_optimize4 crawler=new Hexagon_optimize4();
 		//
 		/** end switching algorithms */
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
@@ -181,7 +103,7 @@ public class MainSynthetic extends Strategy {
 		Strategy.dbInMemory = new DBInMemory();
 		Strategy.dbInMemory.pois = readFromGeneratedDB(source);
 		Strategy.dbInMemory.index();
-	   // Strategy.dbExternal.createTables(target);
+		// Strategy.dbExternal.createTables(target);
 		crawler.crawl(state, categoryID, category, envelope);
 		//
 		logger.info("Finished ! Oh ! Yeah! ");

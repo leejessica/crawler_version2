@@ -38,10 +38,10 @@ public class Hexagon_optimize4 extends Strategy {
 	 * 
 	 */
 	// public static int recursion = 1;
-	public static int NEED_POINTS_NUMBER = 100;
+	public static int NEED_POINTS_NUMBER = 57584;
 	public static int countPoint = 0;
 	public static double sqrt3 = Math.sqrt(3);
-	public static double key = 0.97;
+	public static double key = 0.95;
 	public static int countquery = 0;
 
 	private static Coordinate startPoint = new Coordinate();
@@ -52,10 +52,10 @@ public class Hexagon_optimize4 extends Strategy {
 	private static Set<VQP> visitedcircle_Queue = new HashSet<VQP>();
 
 	public Hexagon_optimize4() {
-//		startPoint.x = -73.355835;
-//		startPoint.y = 42.746632;
-		 startPoint.x=500;
-		 startPoint.y= 500;
+		startPoint.x = -73.355835;
+		startPoint.y = 42.746632;
+//		 startPoint.x=500;
+//		 startPoint.y= 500;
 
 		logger.info("------------HexagonCrawler2_Modify------------");
 	}
@@ -199,7 +199,7 @@ public class Hexagon_optimize4 extends Strategy {
 						visitedcircle_Queue.add(new VQP(p, crawl_radius));
 						// query in the hexagon
 						if (crawl_radius < radius * key) {
-							crawl_radius = queryInHexagon(p, envelopeState,
+							crawl_radius = queryInHexagon(p, envelopeState, crawl_radius, 
 									radius, state, category, query);
 						}
 						Circle aaCircle = new Circle(p, crawl_radius);
@@ -220,7 +220,7 @@ public class Hexagon_optimize4 extends Strategy {
 				}
 			}
 			/* calculate the cover radius */
-			double coverRadius = calculateIncircle(startPoint, visited_Queue);
+			double coverRadius = calculateIncircle(startPoint, radius, visited_Queue);
 			visited_Queue.clear();
 			Circle circle = new Circle(startPoint, coverRadius);
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -255,7 +255,7 @@ public class Hexagon_optimize4 extends Strategy {
 	 * 
 	 * @radius: the radius of the circle with the center of startPoint
 	 */
-	public double queryInHexagon(Coordinate point, Envelope envelopeState,
+	public double queryInHexagon(Coordinate point, Envelope envelopeState, double crawl_radius, 
 			double radius, String state, int category, String query) {
 		LinkedList<VQP> visited_Queue = new LinkedList<VQP>();
 		// initial the rectangle
@@ -264,7 +264,7 @@ public class Hexagon_optimize4 extends Strategy {
 		coverRectangle(envelope, envelopeState, state, category, query,
 				visited_Queue);
 		// calculate the coverradius
-		double coverraidus = calculateIncircle(point, visited_Queue);
+		double coverraidus = calculateIncircle(point, crawl_radius, visited_Queue);
 		visited_Queue.clear();
 		return coverraidus;
 	}
@@ -324,7 +324,7 @@ public class Hexagon_optimize4 extends Strategy {
 	/*
 	 * algorithm 1 To calculate the maximum inscribed circle of a given area
 	 */
-	public double calculateIncircle(Coordinate startPoint,
+	public double calculateIncircle(Coordinate startPoint, double radius,
 			LinkedList<VQP> visitedcircle_Queue) {
 		double minRadius = 1e308;
 		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {
@@ -354,6 +354,9 @@ public class Hexagon_optimize4 extends Strategy {
 						temP = inter.getIntersectPoint_right();
 					// test if the temP is inside another circle
 					boolean in = false;
+					VQP firstcircle=new VQP(startPoint, radius);
+					if(isinCircle(temP, firstcircle))
+						in=true;
 					Iterator<VQP> it = visitedcircle_Queue.iterator();
 					while (it.hasNext() && !in) {
 						VQP circle3 = it.next();
