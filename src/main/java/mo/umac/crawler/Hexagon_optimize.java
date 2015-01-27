@@ -36,7 +36,7 @@ public class Hexagon_optimize extends Strategy {
 	 * 
 	 */
 	// public static int recursion = 1;
-	public static int NEED_POINTS_NUMBER = 200;
+	public static int NEED_POINTS_NUMBER = 100;
 	public static int countPoint = 0;
 	public static double sqrt3 = Math.sqrt(3);
 	public static double key = 0.97;
@@ -50,12 +50,12 @@ public class Hexagon_optimize extends Strategy {
 	private static Set<VQP> visitedcircle_Queue = new HashSet<VQP>();
 
 	public Hexagon_optimize() {
-		startPoint.x = -73.355835;
-		startPoint.y = 42.746632;
-		// startPoint.x=500;
-		// startPoint.y= 500;
+//		startPoint.x = -73.355835;
+//		startPoint.y = 42.746632;
+		 startPoint.x=500;
+		 startPoint.y= 500;
 
-		logger.info("------------HexagonCrawler2_Modify------------");
+		logger.info("------------Hexagon_optimize------------");
 	}
 
 	@Override
@@ -233,12 +233,13 @@ public class Hexagon_optimize extends Strategy {
 			while (it.hasNext()) {
 				int id = it.next().getId();
 				APOI pp = DBInMemory.pois.get(id);
-				if (startPoint.distance(pp.getCoordinate()) < coverRadius)
+				if (startPoint.distance(pp.getCoordinate()) <= coverRadius)
 					eligibleset.add(pp);
 			}
 			countPoint = eligibleset.size();
 			logger.info("eliglible point during the query=" + countPoint
 					+ "  level=" + level);
+			logger.info("countquery="+countquery);
 			if (countPoint == Strategy.TOTAL_POINTS) {
 				logger.info("We can only find " + TOTAL_POINTS + "points!");
 				break;

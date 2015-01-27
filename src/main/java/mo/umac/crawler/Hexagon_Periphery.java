@@ -16,7 +16,9 @@ import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSetD2;
 import mo.umac.metadata.plugins.IntersectPoint;
+import mo.umac.metadata.plugins.PandC;
 import mo.umac.metadata.plugins.VQP;
+import mo.umac.metadata.plugins.VQP1;
 import mo.umac.spatial.Circle;
 
 import com.infomatiq.jsi.Point;
@@ -48,6 +50,7 @@ public class Hexagon_Periphery extends Strategy {
 	// @param visitedcircle_Queue: record the information(coordinate,radius)of
 	// the visited points
 	private static Set<VQP> visitedcircle_Queue = new HashSet<VQP>();
+	private static double inRadius=0;
 
 	public Hexagon_Periphery() {
 		startPoint.x = -73.355835;
@@ -163,18 +166,19 @@ public class Hexagon_Periphery extends Strategy {
 			PaintShapes.paint.myRepaint();
 		}
 
-		double radius = distance; // record the first crawl radius
+		double refRadius = distance; // record the first crawl radius
+		inRadius=refRadius;
 		/* compute coordinates of the points which are used to next round query */
-		calculatePoint(startPoint, radius, visitedcircle_Queue, unvisited_Queue);
+		calculatePoint(startPoint, refRadius, visitedcircle_Queue, unvisited_Queue);
 		int level = 1;
 		while (countPoint < NEED_POINTS_NUMBER) {
 			for (int i = 1; i <= level * 6; i++) {
 				if (!unvisited_Queue.isEmpty()) {
 
 					Coordinate p = unvisited_Queue.removeFirst();
-					calculatePoint(p, radius, visitedcircle_Queue,
+					calculatePoint(p, refRadius, visitedcircle_Queue,
 							unvisited_Queue);
-					VQP c = new VQP(p, radius);
+					VQP c = new VQP(p, inRadius);
 					if (needQuery(c, visitedcircle_Queue, envelopeState)) {
 						AQuery Hexquery = new AQuery(p, state, category, query,
 								MAX_TOTAL_RESULTS_RETURNED);
@@ -203,12 +207,52 @@ public class Hexagon_Periphery extends Strategy {
 						visitedcircle_Queue.add(new VQP(p, 0));
 						visited_Queue.addLast(c);
 					}
-				}
-				//update the neighborlist
-				LinkedList<VQP1> neighborinfo=new LinkedList<VQP1>();
+				}				
 			}
+			//update the neighborlist and find the uncover arc
+			LinkedList<VQP1> neighborinfo=new LinkedList<VQP1>();
+			VQP inCircle=new VQP(startPoint, inRadius);
+			for(int j=0;j<level*6;j++){
+				VQP updateV=visited_Queue.get(j);
+				VQP1 updateV1=new VQP1();
+				updateV1.setself(updateV);
+				VQP tvArray[]=new VQP[2];
+				for(int k1=0;k1<level*6&&k1!=j;k1++){
+					VQP tv1=visited_Queue.get(k1);
+				    if(Math.abs(tv1.getCoordinate().distance(updateV.getCoordinate())-sqrt3*key*refRadius)<1e-6){
+				    	if(tvArray[0]==null)
+				    		tvArray[0]=tv1;
+				    	else tvArray[1]=tv1;
+				    }
+				}
+				if(circles_Insecter(updateV, inCircle)){
+					IntersectPoint tI=calculateIntersectPoint(updateV, inCircle);
+					double td1=tI.getIntersectPoint_left().distance(tvArray[0].getCoordinate());
+					double td2=tI.getIntersectPoint_left().distance(tvArray[1].getCoordinate());
+					if(td1<td2){
+						PandC pc1=new PandC(tI.getIntersectPoint_left(), tvArray[0]);
+						updateV1.setleft(pc1);
+						PandC pc2=new PandC(tI.getIntersectPoint_right(), tvArray[1]);
+						updateV1.setright(pc2);
+					}
+					else{
+						PandC pc3=new PandC(tI.getIntersectPoint_left(), tvArray[1]);
+						updateV1.setleft(pc3);
+						PandC pc4=new PandC(tI.getIntersectPoint_right(), tvArray[0]);
+						updateV1.setright(pc4);
+					}
+				}
+				else{
+					PandC pc5=new PandC(null, tvArray[0]);
+					updateV1.setleft(pc5);
+					PandC pc6=new PandC(null, tvArray[1]);
+					updateV1.setright(pc6);
+				}
+				neighborinfo.add(updateV1);
+			}
+			
 			/* calculate the cover radius */
-			double coverRadius = calculateIncircle(startPoint, radius,
+			double coverRadius = calculateIncircle(startPoint, 
 					visited_Queue);
 			visited_Queue.clear();
 			Circle circle = new Circle(startPoint, coverRadius);
@@ -247,7 +291,7 @@ public class Hexagon_Periphery extends Strategy {
 	/*
 	 * algorithm 1 To calculate the maximum inscribed circle of a given area
 	 */
-	public double calculateIncircle(Coordinate startPoint, double radius,
+	public double calculateIncircle(Coordinate startPoint, 
 			LinkedList<VQP> visitedcircle_Queue) {
 		double minRadius = 1e308;
 		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {

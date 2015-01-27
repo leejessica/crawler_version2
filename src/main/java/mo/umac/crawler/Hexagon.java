@@ -31,7 +31,7 @@ public class Hexagon extends Strategy {
 	 * 
 	 */
 	// public static int recursion = 1;
-	public static int NEED_POINTS_NUMBER=200;
+	public static int NEED_POINTS_NUMBER=100;
 	public static int countPoint = 0;
 	public static double sqrt3 = Math.sqrt(3);
 	public static double key = 0.97;
@@ -45,10 +45,10 @@ public class Hexagon extends Strategy {
 
 	public Hexagon() {
 		super();
-//		startPoint.x = 500;
-//		startPoint.y=500;
-		startPoint.x=-73.3566809;
-		startPoint.y= 42.372965;
+		startPoint.x = 500;
+		startPoint.y=500;
+//		startPoint.x=-73.3566809;
+//		startPoint.y= 42.372965;
 		logger.info("------------HexagonCrawler2------------");
 	}
 

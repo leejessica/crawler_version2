@@ -30,19 +30,10 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class MainSynthetic extends Strategy {
 
-	// private static String source =
-	// "../data-experiment/synthetic/skew-2d-250-0.3";
-	// private static String source =
-	// "../data-experiment/synthetic/2d-uniform/2000";
-	// private static String source =
-	// "../data-experiment/synthetic/uniform-2d-2000";
-	private static String source = "../data-experiment/synthetic/2d-uniform/1000";
+	private static String source = "../data-experiment/synthetic/2d-uniform/10000";
 	private static String target = "../data-experiment/synthetic/target";
-	private static int n = 100;
+	private static int n = 10000;
 	private int topK = 15;
-	// private static String source = "../data-experiment/synthetic/test";
-	// private static int n = 10;
-	// private int topK = 2;
 	private static Envelope envelope = new Envelope(0, 1000, 0, 1000);
 	private static String state = "NY";
 	private static int categoryID = 96926236;
@@ -58,7 +49,7 @@ public class MainSynthetic extends Strategy {
 	 */
 	public static void main(String[] args) {
 		boolean debug = false;
-		PaintShapes.painting = true;
+		PaintShapes.painting = false;
 		MainYahoo.shutdownLogs(debug);
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		MainSynthetic test = new MainSynthetic();
@@ -66,7 +57,7 @@ public class MainSynthetic extends Strategy {
 			WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		}
 		Strategy.dbExternal = new H2DB(source, target);
-		// test.generateData();
+//		 test.generateData();
 		if (PaintShapes.painting) {
 			test.drawDataPoints();
 		}
@@ -174,7 +165,8 @@ public class MainSynthetic extends Strategy {
 		//AlgoProjection crawler = new AlgoProjection();
 		//Hexagon crawler=new Hexagon();
 		Hexagon_optimize crawler=new Hexagon_optimize();
-		//Periphery_Optimize crawler=new Periphery_Optimize();
+//		Hexagon_optimize4 crawler=new Hexagon_optimize4();
+//		Periphery_Optimize2 crawler=new Periphery_Optimize2();
 		//PeripheryQuery crawler=new PeripheryQuery();
 		// AlgoPartition crawler = new AlgoPartition();
 		// AlgoPartition.clusterRegionFile = clusterRegionFile;
@@ -189,7 +181,7 @@ public class MainSynthetic extends Strategy {
 		Strategy.dbInMemory = new DBInMemory();
 		Strategy.dbInMemory.pois = readFromGeneratedDB(source);
 		Strategy.dbInMemory.index();
-		// Strategy.dbExternal.createTables(target);
+	   // Strategy.dbExternal.createTables(target);
 		crawler.crawl(state, categoryID, category, envelope);
 		//
 		logger.info("Finished ! Oh ! Yeah! ");

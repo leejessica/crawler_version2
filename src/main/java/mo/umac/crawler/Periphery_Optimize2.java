@@ -29,7 +29,7 @@ public class Periphery_Optimize2 extends Strategy{
 	//private Coordinate startPoint=new Coordinate();
 	
 	public static int countquery=0;
-	public static int NEED_POINTS_NUM=200;
+	public static int NEED_POINTS_NUM=1000;
 	public static int countPoint=0;
 	public static int level=0;
 	public static Coordinate startPoint=new Coordinate();
@@ -44,10 +44,10 @@ public class Periphery_Optimize2 extends Strategy{
 	
 	public Periphery_Optimize2() {
 		//super();
-		startPoint.x = -73.355835;
-		startPoint.y = 42.746632;
-//		 startPoint.x=500;
-//		 startPoint.y= 500;
+//		startPoint.x = -73.355835;
+//		startPoint.y = 42.746632;
+		 startPoint.x=500;
+		 startPoint.y= 500;
 		logger.info("------------PeripheryQuery------------");
 	}
 	// public PeripheryQuery(Coordinate a){

@@ -13,8 +13,6 @@ import java.util.Random;
 import java.util.Set;
 
 import mo.umac.crawler.AlgoSlice;
-import mo.umac.crawler.Binary_estimateR;
-import mo.umac.crawler.Binary_wholeSpace;
 import mo.umac.crawler.Hexagon;
 import mo.umac.crawler.Hexagon_optimize;
 import mo.umac.crawler.Hexagon_optimize2;
@@ -52,7 +50,7 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 	public static void main(String[] args) {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		CrawlerTest test = new CrawlerTest();
-		PaintShapes.painting = false;
+		PaintShapes.painting = true;
 		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		//Coordinate startPoint=new Coordinate();
 		test.calling();
