@@ -24,12 +24,12 @@ import mo.umac.spatial.Circle;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
-public class Periphery_Optimize extends Strategy{
+public class Periphery_Optimize2 extends Strategy{
 	
 	//private Coordinate startPoint=new Coordinate();
 	
 	public static int countquery=0;
-	public static int NEED_POINTS_NUM=2859;
+	public static int NEED_POINTS_NUM=200;
 	public static int countPoint=0;
 	public static int level=0;
 	public static Coordinate startPoint=new Coordinate();
@@ -42,7 +42,7 @@ public class Periphery_Optimize extends Strategy{
 	private static Coordinate levelstartPoint=new Coordinate();//record the start point of every level 
 	
 	
-	public Periphery_Optimize() {
+	public Periphery_Optimize2() {
 		//super();
 		startPoint.x = -73.355835;
 		startPoint.y = 42.746632;
@@ -96,11 +96,40 @@ public class Periphery_Optimize extends Strategy{
         levelstartPoint.y=startPoint.y+inRadius;
         //record all the issued query except the first one
         LinkedList<VQP> visited_Queue=new LinkedList<VQP>();
-        while(countPoint<NEED_POINTS_NUM){
-        	logger.info("==========================");
-        	logger.info("levelstartPoint="+levelstartPoint.toString());
+        if(countPoint<NEED_POINTS_NUM){
         	onelevelQuery(state, category, query, visited_Queue);
         }
+        while(countPoint<NEED_POINTS_NUM){
+        	AQuery continuequery=new AQuery(levelstartPoint, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
+        	ResultSetD2 continueresult=query(continuequery);
+        	queryset.addAll(continueresult.getPOIs());
+        	countquery++;
+        	int continuesize=continueresult.getPOIs().size();
+        	double continueradius=levelstartPoint.distance(continueresult.getPOIs().get(continuesize-1).getCoordinate());
+        	visitedcircle_Queue.add(new VQP(levelstartPoint, continueradius));
+        	visited_Queue.addLast(new VQP(levelstartPoint, continueradius));
+        	Circle aaaCircle = new Circle(levelstartPoint, continueradius);
+    		if (logger.isDebugEnabled() && PaintShapes.painting) {
+    			PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+    			PaintShapes.paint.addCircle(aaaCircle);
+    			PaintShapes.paint.myRepaint();
+    		}
+        	inRadius=calculateIncircle(startPoint, visited_Queue);
+        	Iterator<APOI>iterator=queryset.iterator();
+        	while(iterator.hasNext()){
+        		APOI continueAPOI=iterator.next();
+        	    if(startPoint.distance(continueAPOI.getCoordinate())<=inRadius)
+        	    	eligibleset.add(continueAPOI);
+        	}
+        	countPoint=eligibleset.size();
+        	Circle aaCircle = new Circle(startPoint, inRadius);
+    		if (logger.isDebugEnabled() && PaintShapes.painting) {
+    			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+    			PaintShapes.paint.addCircle(aaCircle);
+    			PaintShapes.paint.myRepaint();
+    		}
+        }
+        
 	}
 	
 	public void onelevelQuery(String state, int category, String query, LinkedList<VQP>visited_Queue){
@@ -448,7 +477,6 @@ public class Periphery_Optimize extends Strategy{
 					if (!in) {
 						if(minRadius>temP.distance(startPoint)){
 						   s=temP;
-						   logger.info("s="+s.toString());
 						}
 						minRadius = Math.min(minRadius,	temP.distance(startPoint));
 					}

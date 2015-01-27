@@ -26,13 +26,11 @@ import com.vividsolutions.jts.geom.Envelope;
 /**
  * @author Jessica
  * 
- * This algorithm recursive call quad tree to cover a regular rectangle
- *  which is the minimum regular rectangle of the uncovred hexagon, 
- *  needQuery function also will be called when query in hexagon in order to
- *  test whether a query is need or not
- * 
+ * This algorithm recursive call the queryInHexagon function to cover the hexagon which
+ *  cannot be covered by a single query,and needQuery function also be called to test 
+ *  whether a query is need or not
  */
-public class Hexagon_optimize4 extends Strategy {
+public class Hexagon_Periphery extends Strategy {
 
 	/**
 	 * 
@@ -51,11 +49,11 @@ public class Hexagon_optimize4 extends Strategy {
 	// the visited points
 	private static Set<VQP> visitedcircle_Queue = new HashSet<VQP>();
 
-	public Hexagon_optimize4() {
-//		startPoint.x = -73.355835;
-//		startPoint.y = 42.746632;
-		 startPoint.x=500;
-		 startPoint.y= 500;
+	public Hexagon_Periphery() {
+		startPoint.x = -73.355835;
+		startPoint.y = 42.746632;
+		// startPoint.x=500;
+		// startPoint.y= 500;
 
 		logger.info("------------HexagonCrawler2_Modify------------");
 	}
@@ -75,7 +73,6 @@ public class Hexagon_optimize4 extends Strategy {
 		// Coordinate c = evenlopeState.centre();
 
 		ununiformlyquery(startPoint, envelopeState, state, category, query);
-		logger.info("countquery"+countquery);
 		logger.info("eligiblepoint=" + countPoint);
 	}
 
@@ -189,19 +186,8 @@ public class Hexagon_optimize4 extends Strategy {
 						Coordinate farthest1Coordinate = farthest1
 								.getCoordinate();
 						double distance1 = p.distance(farthest1Coordinate);
-						double crawl_radius = distance1;
-						/*
-						 * record the information of the visited point，using to
-						 * record all the visited points since we want to using
-						 * the information to obtain the neighbor circles and
-						 * futher reduce the query cost
-						 */
-						visitedcircle_Queue.add(new VQP(p, crawl_radius));
-						// query in the hexagon
-						if (crawl_radius < radius * key) {
-							crawl_radius = queryInHexagon(p, envelopeState,
-									radius, state, category, query);
-						}
+						double crawl_radius = distance1;						
+						visitedcircle_Queue.add(new VQP(p, crawl_radius));						
 						Circle aaCircle = new Circle(p, crawl_radius);
 						if (logger.isDebugEnabled() && PaintShapes.painting) {
 							PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
@@ -218,9 +204,12 @@ public class Hexagon_optimize4 extends Strategy {
 						visited_Queue.addLast(c);
 					}
 				}
+				//update the neighborlist
+				LinkedList<VQP1> neighborinfo=new LinkedList<VQP1>();
 			}
 			/* calculate the cover radius */
-			double coverRadius = calculateIncircle(startPoint, visited_Queue);
+			double coverRadius = calculateIncircle(startPoint, radius,
+					visited_Queue);
 			visited_Queue.clear();
 			Circle circle = new Circle(startPoint, coverRadius);
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -254,76 +243,11 @@ public class Hexagon_optimize4 extends Strategy {
 	 * 
 	 * @radius: the radius of the circle with the center of startPoint
 	 */
-	public double queryInHexagon(Coordinate point, Envelope envelopeState,
-			double radius, String state, int category, String query) {
-		LinkedList<VQP> visited_Queue = new LinkedList<VQP>();
-		// initial the rectangle
-		double R = radius * key;
-		Envelope envelope = new Envelope(point.x - R, point.x + R, point.y - R, point.y + R );
-		coverRectangle(envelope, envelopeState, state, category, query,
-				visited_Queue);
-		// calculate the coverradius
-		double coverraidus = calculateIncircle(point, visited_Queue);
-		visited_Queue.clear();
-		return coverraidus;
-	}
-
-	public void coverRectangle(Envelope envelope, Envelope envelopeState,
-			String state, int category, String query,
-			LinkedList<VQP> visited_Queue) {
-
-		Envelope e[] = partitionEnvelope(envelope);
-		for (int i = 0; i < e.length; i++) {
-			// rectangle is intersect with envelopeState
-			Coordinate p1 = new Coordinate();
-			p1.x = (e[i].getMinX() + e[i].getMaxX()) / 2;
-			p1.y = (e[i].getMinY() + e[i].getMaxY()) / 2;
-			Coordinate p2 = new Coordinate(e[i].getMinX(), e[i].getMinY());
-			double needradius = p1.distance(p2);
-			VQP vqp=new VQP(p1, needradius);
-			if (needQuery(vqp, visitedcircle_Queue, envelopeState)) {
-				AQuery Firstquery = new AQuery(p1, state, category, query,
-						MAX_TOTAL_RESULTS_RETURNED);
-				ResultSetD2 resultSetStart = query(Firstquery);
-				countquery++;
-				queryset.addAll(resultSetStart.getPOIs());
-				int size = resultSetStart.getPOIs().size();
-				APOI farthest = resultSetStart.getPOIs().get(size - 1);
-				double radius = p1.distance(farthest.getCoordinate());
-				visitedcircle_Queue.add(new VQP(p1, radius));
-				visited_Queue.add(new VQP(p1, radius));
-				Circle circle = new Circle(p1, radius);
-				if (logger.isDebugEnabled() && PaintShapes.painting) {
-					PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-					PaintShapes.paint.addCircle(circle);
-					PaintShapes.paint.myRepaint();
-				}
-				if (needradius > radius) {
-					coverRectangle(e[i], envelopeState, state, category, query,
-							visited_Queue);
-				} 					
-			} else {
-				visitedcircle_Queue.add(new VQP(p1, 0));
-				visited_Queue.add(new VQP(p1, needradius));
-			}
-		}
-	}
-
-	public Envelope[] partitionEnvelope(Envelope envelop) {
-		Envelope[] e = new Envelope[4];
-		double width = envelop.getWidth();// maxX-minX
-		double height = envelop.getHeight();
-		e[0]=new Envelope(envelop.getMinX(), envelop.getMinX()+width/2, envelop.getMinY(), envelop.getMinY()+height/2);
-		e[1]=new Envelope(envelop.getMinX(), envelop.getMinX()+width/2, envelop.getMinY()+height/2, envelop.getMaxY());
-		e[2]=new Envelope(envelop.getMinX()+width/2, envelop.getMaxX(), envelop.getMinY(), envelop.getMinY()+height/2);
-		e[3]=new Envelope(envelop.getMinX()+width/2, envelop.getMaxX(), envelop.getMinY()+height/2, envelop.getMaxY());
-		return e;
-	}
-
+	
 	/*
 	 * algorithm 1 To calculate the maximum inscribed circle of a given area
 	 */
-	public double calculateIncircle(Coordinate startPoint,
+	public double calculateIncircle(Coordinate startPoint, double radius,
 			LinkedList<VQP> visitedcircle_Queue) {
 		double minRadius = 1e308;
 		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {

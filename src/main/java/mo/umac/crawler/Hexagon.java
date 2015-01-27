@@ -31,7 +31,7 @@ public class Hexagon extends Strategy {
 	 * 
 	 */
 	// public static int recursion = 1;
-	public static int NEED_POINTS_NUMBER=1000;
+	public static int NEED_POINTS_NUMBER=200;
 	public static int countPoint = 0;
 	public static double sqrt3 = Math.sqrt(3);
 	public static double key = 0.97;

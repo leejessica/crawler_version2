@@ -21,8 +21,8 @@ import mo.umac.crawler.Hexagon_optimize2;
 import mo.umac.crawler.Hexagon_optimize3;
 import mo.umac.crawler.Hexagon_optimize4;
 import mo.umac.crawler.MainYahoo;
-import mo.umac.crawler.PeripheryQuery;
 import mo.umac.crawler.Periphery_Optimize;
+import mo.umac.crawler.Periphery_Optimize2;
 import mo.umac.crawler.Strategy;
 import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
@@ -53,7 +53,7 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		CrawlerTest test = new CrawlerTest();
 		PaintShapes.painting = false;
-//		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
+		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		//Coordinate startPoint=new Coordinate();
 		test.calling();
 
@@ -67,15 +67,16 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		// HexagonCrawler crawler = new HexagonCrawler();
 		//AlgoSlice crawler = new AlgoSlice();
 		
-//		Hexagon crawler=new Hexagon();
+		Hexagon crawler=new Hexagon();
 		//Binary_estimateR crawler=new Binary_estimateR();
 		//Binary_wholeSpace crawler=new Binary_wholeSpace();
 		//PeripheryQuery crawler=new PeripheryQuery();
-		//Periphery_Optimize crawler=new Periphery_Optimize();
+//		Periphery_Optimize crawler=new Periphery_Optimize();
+//	    Periphery_Optimize2 crawler=new Periphery_Optimize2();	
 //		Hexagon_optimize crawler=new Hexagon_optimize();
 //		Hexagon_optimize2 crawler=new Hexagon_optimize2();
 //		Hexagon_optimize4 crawler=new Hexagon_optimize4();
-		Hexagon_optimize3 crawler=new Hexagon_optimize3();
+//		Hexagon_optimize3 crawler=new Hexagon_optimize3();
 		
 		String state = "NY";
 		int categoryID = 96926236;
