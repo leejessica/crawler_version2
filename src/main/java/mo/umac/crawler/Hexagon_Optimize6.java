@@ -26,10 +26,7 @@ import com.vividsolutions.jts.geom.Envelope;
 /**
  * @author Jessica
  * 
- * This algorithm recursive call quad tree to cover a regular rectangle
- *  which is the minimum regular rectangle of the uncovred hexagon, 
- *  needQuery function also will be called when query in hexagon in order to
- *  test whether a query is need or not
+ * This algorithm call the periphery to finish the query in circle
  * 
  */
 public class Hexagon_Optimize6 extends Strategy {
@@ -219,6 +216,9 @@ public class Hexagon_Optimize6 extends Strategy {
 					}
 				}
 			}
+		    for(int k=0;k<lowCircle.size();k++){
+		    	VQP lc=lowCircle.get(k);
+		    }
 			/* calculate the cover radius */
 			double coverRadius = calculateIncircle(startPoint, radius, visited_Queue);
 			visited_Queue.clear();
@@ -358,7 +358,8 @@ public class Hexagon_Optimize6 extends Strategy {
 					if(isinCircle(temP, firstcircle))
 						in=true;
 					Iterator<VQP> it = visitedcircle_Queue.iterator();
-					while (it.hasNext() && !in) {
+					while (it.hasNext()) {
+						if(!in){
 						VQP circle3 = it.next();
 						if (!circle1.getCoordinate().equals2D(
 								circle3.getCoordinate())
@@ -368,6 +369,7 @@ public class Hexagon_Optimize6 extends Strategy {
 								in = true;
 							}
 						}
+					}
 					}
 					if (!in) {
 						minRadius = Math.min(minRadius,
@@ -617,45 +619,32 @@ public class Hexagon_Optimize6 extends Strategy {
 					intercircleQ.addLast(circle2);
 			}
 		}
-		Iterator<VQP> it2 = intercircleQ.iterator();
-		while (it2.hasNext() && coverage) {
-			VQP circletemp1 = it2.next();
-			IntersectPoint inter1 = calculateIntersectPoint(circle1,
-					circletemp1);
+		
+		for(int i=0;i<intercircleQ.size();i++) {
+			VQP circletemp1=intercircleQ.get(i);
+			IntersectPoint inter1 = calculateIntersectPoint(circle1,circletemp1);
 			boolean stopleft = false;
 			boolean stopright = false;
 			if (isinCircle(inter1.getIntersectPoint_left(), circle)) {
-				Iterator<VQP> it3 = intercircleQ.iterator();
-				while (it3.hasNext() && !stopleft) {
-					VQP circletemp2 = it3.next();
-					if (!pointsequal(circletemp1.getCoordinate(),
-							circletemp2.getCoordinate())) {
-						if (isinCircle(inter1.getIntersectPoint_left(),
-								circletemp2)
-								|| isAtCircumference(
-										inter1.getIntersectPoint_left(),
-										circletemp2)) {
+				for(int j=0;j<intercircleQ.size()&&!stopleft&&j!=i;j++){
+					VQP circletemp2 = intercircleQ.get(j);					
+					if (isinCircle(inter1.getIntersectPoint_left(),circletemp2)
+						|| isAtCircumference(inter1.getIntersectPoint_left(),circletemp2)) {
 							stopleft = true;
 						}
-					}
+					
 				}
 			} else {
 				stopleft = true;
 			}
 			if (isinCircle(inter1.getIntersectPoint_right(), circle)) {
-				Iterator<VQP> it4 = intercircleQ.iterator();
-				while (it4.hasNext() && !stopright) {
-					VQP circletemp3 = it4.next();
-					if (!pointsequal(circletemp1.getCoordinate(),
-							circletemp3.getCoordinate())) {
-						if (isinCircle(inter1.getIntersectPoint_right(),
-								circletemp3)
-								|| isAtCircumference(
-										inter1.getIntersectPoint_right(),
-										circletemp3)) {
+				for(int k=0;k<intercircleQ.size()&&!stopright&&k!=i;k++) {
+					VQP circletemp3 = intercircleQ.get(k);
+					if (isinCircle(inter1.getIntersectPoint_right(),circletemp3)
+						|| isAtCircumference(inter1.getIntersectPoint_right(),circletemp3)) {
 							stopright = true;
 						}
-					}
+					
 				}
 			} else {
 				stopright = true;

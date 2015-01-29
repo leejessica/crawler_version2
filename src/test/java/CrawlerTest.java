@@ -50,8 +50,8 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 	public static void main(String[] args) {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		CrawlerTest test = new CrawlerTest();
-		PaintShapes.painting = true;
-		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
+		PaintShapes.painting = false;
+//		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		//Coordinate startPoint=new Coordinate();
 		test.calling();
 
@@ -71,9 +71,9 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		//PeripheryQuery crawler=new PeripheryQuery();
 //		Periphery_Optimize crawler=new Periphery_Optimize();
 //	    Periphery_Optimize2 crawler=new Periphery_Optimize2();	
-		Hexagon_optimize crawler=new Hexagon_optimize();
+//		Hexagon_optimize crawler=new Hexagon_optimize();
 //		Hexagon_optimize2 crawler=new Hexagon_optimize2();
-//		Hexagon_optimize4 crawler=new Hexagon_optimize4();
+		Hexagon_optimize4 crawler=new Hexagon_optimize4();
 //		Hexagon_optimize3 crawler=new Hexagon_optimize3();
 		
 		String state = "NY";
@@ -84,7 +84,7 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		String testTarget = "../crawler-data/yahoolocal-h2/target";
 		//
 		int numItems = 1000;
-		int topK = 15;
+		int topK = 10;
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 		//
 		Strategy.categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);

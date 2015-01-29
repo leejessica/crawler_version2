@@ -29,7 +29,7 @@ public class Periphery_Optimize2 extends Strategy{
 	//private Coordinate startPoint=new Coordinate();
 	
 	public static int countquery=0;
-	public static int NEED_POINTS_NUM=57584;
+	public static int NEED_POINTS_NUM=100;
 	public static int countPoint=0;
 	public static int level=0;
 	public static Coordinate startPoint=new Coordinate();
@@ -103,7 +103,6 @@ public class Periphery_Optimize2 extends Strategy{
         	onelevelQuery(state, category, query, visited_Queue);
             logger.info("countPoint="+countPoint+"  countquery="+countquery);
         }
-        int k=1;
         while(countPoint<NEED_POINTS_NUM){
         	AQuery continuequery=new AQuery(levelstartPoint, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
         	ResultSetD2 continueresult=query(continuequery);
@@ -133,8 +132,7 @@ public class Periphery_Optimize2 extends Strategy{
     			PaintShapes.paint.addCircle(aaCircle);
     			PaintShapes.paint.myRepaint();
     		}
-    		System.out.println("k="+k);
-    		k++;
+    		
         }
         
 	}

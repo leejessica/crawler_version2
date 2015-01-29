@@ -37,7 +37,7 @@ public class Hexagon_optimize2 extends Strategy {
 	 * 
 	 */
 	// public static int recursion = 1;
-	public static int NEED_POINTS_NUMBER = 1000;
+	public static int NEED_POINTS_NUMBER = 100;
 	public static int countPoint = 0;
 	public static double sqrt3 = Math.sqrt(3);
 	public static double key = 0.97;
@@ -51,10 +51,10 @@ public class Hexagon_optimize2 extends Strategy {
 	private static Set<VQP> visitedcircle_Queue = new HashSet<VQP>();
 
 	public Hexagon_optimize2() {
-		startPoint.x = -73.355835;
-		startPoint.y = 42.746632;
-//		 startPoint.x=500;
-//		 startPoint.y= 500;
+//		startPoint.x = -73.355835;
+//		startPoint.y = 42.746632;
+		 startPoint.x=500;
+		 startPoint.y= 500;
 
 		logger.info("------------HexagonCrawler2_Modify------------");
 	}
@@ -700,13 +700,52 @@ public class Hexagon_optimize2 extends Strategy {
 	 */
 	public boolean arc_contain(VQP c1, VQP c2, VQP c) {
 		IntersectPoint inter1 = calculateIntersectPoint(c1, c);
+		Coordinate mid=new Coordinate();
+		mid.x=(inter1.getIntersectPoint_left().x+inter1.getIntersectPoint_right().x)/2;
+		mid.y=(inter1.getIntersectPoint_left().y+inter1.getIntersectPoint_right().y)/2;
+		Coordinate A[]=line_circle_intersect(c, mid);
+		Coordinate arcmidpoint=new Coordinate();
+		if(isinCircle(A[0], c1))
+			arcmidpoint=A[0];
+		else arcmidpoint=A[1];
 		if (isinCircle(inter1.getIntersectPoint_left(), c2)
-				&& isinCircle(inter1.getIntersectPoint_right(), c2)) {
+				&& isinCircle(inter1.getIntersectPoint_right(), c2)
+				&&isinCircle(arcmidpoint, c2)) {
 			return true;
 		} else
 			return false;
 	}
 
+	public Coordinate[] line_circle_intersect(VQP circle,Coordinate p){
+		Coordinate startPoint=circle.getCoordinate();
+		double radius=circle.getRadius();
+		 Coordinate[] a =new Coordinate[2];
+		 a[0]=new Coordinate();
+		 a[1]=new Coordinate();
+		 //the slope of the line:k=infinite
+		 if(p.x==startPoint.x){
+			a[0].x=startPoint.x;
+			a[0].y=startPoint.y+radius;
+			a[1].x=startPoint.x;
+			a[1].y=startPoint.y-radius;
+		 }
+		 //k=0
+		 else if(p.y==startPoint.y){
+			 a[0].x=startPoint.x+radius;
+			 a[0].y=startPoint.y;
+			 a[1].x=startPoint.x-radius;
+			 a[1].y=startPoint.y;
+		 }
+		 else{
+			 double k=(p.y-startPoint.y)/(p.x-startPoint.x);
+			 double A=Math.sqrt((radius*radius)/(1+k*k));
+			 a[0].x=startPoint.x+A;
+			 a[0].y=startPoint.y+k*A;
+			 a[1].x=startPoint.x-A;
+			 a[1].y=startPoint.y-k*A;
+		 }
+		 return a;
+	}
 	// To test whether point p1 equals to point p2
 	public boolean pointsequal(Coordinate p1, Coordinate p2) {
 		if (Math.abs(p1.x - p2.x) < 1e-6 && Math.abs(p1.y - p2.y) < 1e-6)

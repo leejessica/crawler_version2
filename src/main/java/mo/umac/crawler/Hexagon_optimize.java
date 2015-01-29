@@ -506,14 +506,6 @@ public class Hexagon_optimize extends Strategy {
 							} else if (circles_Insecter(circle, c1)
 									&& circles_Insecter(c1, c2)) {
 								if (arc_contain(c1, c2, circle)) {
-									// IntersectPoint
-									// tp=calculateIntersectPoint(c1, c2);
-									// if(isinCircle(tp.getIntersectPoint_left(),circle))
-									// effective=false;
-									// else
-									// if(isinCircle(tp.getIntersectPoint_right(),
-									// circle))
-									// effective=false;
 									IntersectPoint tp = calculateIntersectPoint(
 											c1, c2);
 									if (!isinCircle(
@@ -545,6 +537,36 @@ public class Hexagon_optimize extends Strategy {
 		return needquery;
 	}
 
+	public Coordinate[] line_circle_intersect(VQP circle,Coordinate p){
+		Coordinate startPoint=circle.getCoordinate();
+		double radius=circle.getRadius();
+		 Coordinate[] a =new Coordinate[2];
+		 a[0]=new Coordinate();
+		 a[1]=new Coordinate();
+		 //the slope of the line:k=infinite
+		 if(p.x==startPoint.x){
+			a[0].x=startPoint.x;
+			a[0].y=startPoint.y+radius;
+			a[1].x=startPoint.x;
+			a[1].y=startPoint.y-radius;
+		 }
+		 //k=0
+		 else if(p.y==startPoint.y){
+			 a[0].x=startPoint.x+radius;
+			 a[0].y=startPoint.y;
+			 a[1].x=startPoint.x-radius;
+			 a[1].y=startPoint.y;
+		 }
+		 else{
+			 double k=(p.y-startPoint.y)/(p.x-startPoint.x);
+			 double A=Math.sqrt((radius*radius)/(1+k*k));
+			 a[0].x=startPoint.x+A;
+			 a[0].y=startPoint.y+k*A;
+			 a[1].x=startPoint.x-A;
+			 a[1].y=startPoint.y-k*A;
+		 }
+		 return a;
+	}
 	/*
 	 * To determine whether the circumference of a circle is covered by other
 	 * circles or not
@@ -713,8 +735,17 @@ public class Hexagon_optimize extends Strategy {
 	 */
 	public boolean arc_contain(VQP c1, VQP c2, VQP c) {
 		IntersectPoint inter1 = calculateIntersectPoint(c1, c);
+		Coordinate mid=new Coordinate();
+		mid.x=(inter1.getIntersectPoint_left().x+inter1.getIntersectPoint_right().x)/2;
+		mid.y=(inter1.getIntersectPoint_left().y+inter1.getIntersectPoint_right().y)/2;
+		Coordinate A[]=line_circle_intersect(c, mid);
+		Coordinate arcmidpoint=new Coordinate();
+		if(isinCircle(A[0], c1))
+			arcmidpoint=A[0];
+		else arcmidpoint=A[1];
 		if (isinCircle(inter1.getIntersectPoint_left(), c2)
-				&& isinCircle(inter1.getIntersectPoint_right(), c2)) {
+				&& isinCircle(inter1.getIntersectPoint_right(), c2)
+				&&isinCircle(arcmidpoint, c2)) {
 			return true;
 		} else
 			return false;
