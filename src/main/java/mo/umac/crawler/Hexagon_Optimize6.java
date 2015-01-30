@@ -4,9 +4,11 @@
 package mo.umac.crawler;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 
 import paint.PaintShapes;
@@ -46,7 +48,7 @@ public class Hexagon_Optimize6 extends Strategy {
 	private static Set<APOI> eligibleset = new HashSet<APOI>();
 	// @param visitedcircle_Queue: record the information(coordinate,radius)of
 	// the visited points
-	private static Set<VQP> visitedcircle_Queue = new HashSet<VQP>();
+	private static LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
 
 	public Hexagon_Optimize6() {
 		startPoint.x = -73.355835;
@@ -78,7 +80,7 @@ public class Hexagon_Optimize6 extends Strategy {
 
 	/* calculate the centeral points of the hexagons */
 	public void calculatePoint(Coordinate startPoint, double radius,
-			Set<VQP> visitedcircle_Queue, LinkedList<Coordinate> unvisited_Queue) {
+			LinkedList<VQP> visitedcircle_Queue, LinkedList<Coordinate> unvisited_Queue) {
 		Coordinate[] d = new Coordinate[6];
 		for (int i = 0; i < d.length; i++) {
 			d[i] = new Coordinate();
@@ -114,7 +116,7 @@ public class Hexagon_Optimize6 extends Strategy {
 		return flag;
 	}
 
-	private boolean myContain2(Set<VQP> q, Coordinate c) {
+	private boolean myContain2(LinkedList<VQP> q, Coordinate c) {
 		boolean flag = false;
 		Iterator<VQP> it = q.iterator();
 		while (it.hasNext()) {
@@ -188,16 +190,13 @@ public class Hexagon_Optimize6 extends Strategy {
 								.getCoordinate();
 						double distance1 = p.distance(farthest1Coordinate);
 						double crawl_radius = distance1;
-						/*
-						 * record the information of the visited point，using to
-						 * record all the visited points since we want to using
-						 * the information to obtain the neighbor circles and
-						 * futher reduce the query cost
-						 */
 						visitedcircle_Queue.add(new VQP(p, crawl_radius));
-						// query in the hexagon
+						visited_Queue.add(new VQP(p, crawl_radius));
+						//record all the need position where need continue issuing query
+						LinkedList<Integer>indexlist=new LinkedList<Integer>();
 						if (crawl_radius < radius * key) {
 							lowCircle.add(new VQP(p, crawl_radius));
+							indexlist.add(visited_Queue.size()-1);
 						}
 						Circle aaCircle = new Circle(p, crawl_radius);
 						if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -205,9 +204,19 @@ public class Hexagon_Optimize6 extends Strategy {
 							PaintShapes.paint.addCircle(aaCircle);
 							PaintShapes.paint.myRepaint();
 						}
-						// denote the Hexagon has been covered
-						VQP visitedPoint = new VQP(p, crawl_radius);
-						visited_Queue.addLast(visitedPoint);
+					   for(int i1=0;i1<lowCircle.size();i1++){
+						   VQP lowc=lowCircle.get(i1);
+						   LinkedList<VQP>neighborList=new LinkedList<VQP>();
+						   Iterator<VQP>it1=visitedcircle_Queue.iterator();
+						   while(it1.hasNext()){
+							   VQP neighbor=it1.next();
+							   if(neighbor.getRadius()>0&&circles_Insecter(lowc, neighbor)){
+								   neighborList.add(neighbor);
+							   }
+						   }
+						   Map<Double[], Coordinate[]>uncoverArc=findUncoverarc(lowc, neighborList);
+					   }
+						
 					}
 					/* no need to query! */
 					else {
@@ -250,23 +259,40 @@ public class Hexagon_Optimize6 extends Strategy {
 		}
 	}
 
-	/*
-	 * @crawl_radius: the radius of the circle with the center of query point
-	 * 
-	 * @radius: the radius of the circle with the center of startPoint
-	 */
-	public double queryInHexagon(Coordinate point, Envelope envelopeState, double crawl_radius, 
-			double radius, String state, int category, String query) {
-		LinkedList<VQP> visited_Queue = new LinkedList<VQP>();
-		// initial the rectangle
-		double R = radius * key;
-		Envelope envelope = new Envelope(point.x - R, point.x + R, point.y - R, point.y + R );
-		coverRectangle(envelope, envelopeState, state, category, query,
-				visited_Queue);
-		// calculate the coverradius
-		double coverraidus = calculateIncircle(point, crawl_radius, visited_Queue);
-		visited_Queue.clear();
-		return coverraidus;
+	public double queryInhexagon(VQP circle, double radius, String state, int category, String query){
+		double  coverradius=circle.getRadius();
+		LinkedList<VQP>neighborList=new LinkedList<VQP>();
+		for(int i=0;i<visitedcircle_Queue.size();i++){
+			VQP neighbor=visitedcircle_Queue.get(i);
+			if(neighbor.getRadius()>0&&circles_Insecter(circle, neighbor)){
+				neighborList.add(neighbor);
+			}			
+		}
+		Map<Double[], Coordinate[]>uncoverArc=findUncoverarc(circle, neighborList);
+		Iterator<Map.Entry<Double[], Coordinate[]>>it=uncoverArc.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<Double[], Coordinate[]>entry=it.next();
+			Coordinate mid=new Coordinate();
+		    mid.x=(entry.getValue()[0].x+entry.getValue()[1].x)/2;
+		    mid.y=(entry.getValue()[0].y+entry.getValue()[1].y)/2;
+		    Coordinate a[]=line_circle_intersect(circle, mid);
+		    double angle1=getSlantangle(circle.getCoordinate(), a[0]);
+		    double angle2=getSlantangle(circle.getCoordinate(), a[1]);
+		    Coordinate midarc=new Coordinate();
+		    if(angle1>entry.getKey()[0]&&angle1<entry.getKey()[1]){
+		    	midarc=a[0];
+		    }
+		    else midarc=a[1];
+		    //issue the query 
+		    AQuery aquery=new AQuery(midarc, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
+		    ResultSetD2 aresult=query(aquery);
+		    countquery++;
+		    queryset.addAll(aresult.getPOIs());
+		    double midradius=midarc.distance(aresult.getPOIs().get(aresult.getPOIs().size()-1).getCoordinate());
+		    VQP newneighbor=new VQP(midarc, midradius);
+		    neighborList.add(newneighbor);
+		}
+		return coverradius;
 	}
 
 	public void coverRectangle(Envelope envelope, Envelope envelopeState,
@@ -450,7 +476,7 @@ public class Hexagon_Optimize6 extends Strategy {
 	 * @param visitedcircle_Queue: record the information of all the visited
 	 * points through out the whole period of running this algorithm
 	 */
-	public boolean needQuery(VQP circle, Set<VQP> visitedcircle_Queue,
+	public boolean needQuery(VQP circle, LinkedList<VQP> visitedcircle_Queue,
 			Envelope envelopeState) {
 		boolean needquery = false;
 		if (!outspace(circle, envelopeState)) {
@@ -690,8 +716,17 @@ public class Hexagon_Optimize6 extends Strategy {
 	 */
 	public boolean arc_contain(VQP c1, VQP c2, VQP c) {
 		IntersectPoint inter1 = calculateIntersectPoint(c1, c);
+		Coordinate mid=new Coordinate();
+		mid.x=(inter1.getIntersectPoint_left().x+inter1.getIntersectPoint_right().x)/2;
+		mid.y=(inter1.getIntersectPoint_left().y+inter1.getIntersectPoint_right().y)/2;
+		Coordinate A[]=line_circle_intersect(c, mid);
+		Coordinate arcmidpoint=new Coordinate();
+		if(isinCircle(A[0], c1))
+			arcmidpoint=A[0];
+		else arcmidpoint=A[1];
 		if (isinCircle(inter1.getIntersectPoint_left(), c2)
-				&& isinCircle(inter1.getIntersectPoint_right(), c2)) {
+				&& isinCircle(inter1.getIntersectPoint_right(), c2)
+				&&isinCircle(arcmidpoint, c2)) {
 			return true;
 		} else
 			return false;
@@ -756,4 +791,172 @@ public class Hexagon_Optimize6 extends Strategy {
 			return false;
 		return true;
 	}
+	
+	public Map<Double[],Coordinate[] > findUncoverarc(VQP circle,
+			LinkedList<VQP> neighborList) {
+		Map<Double[], Coordinate[]>uncoverArc=new HashMap<Double[], Coordinate[]>();
+		LinkedList<double[]> coverangle = new LinkedList<double[]>();
+		HashMap<Double, Coordinate> angle_coordinate = new HashMap<Double, Coordinate>();
+		// record all the covered arc
+		for (int i = 0; i < neighborList.size(); i++) {
+			VQP c = neighborList.get(i);
+			IntersectPoint inter = calculateIntersectPoint(circle, c);
+			Coordinate mid = new Coordinate();
+			mid.x = (inter.getIntersectPoint_left().x + inter
+					.getIntersectPoint_right().x) / 2;
+			mid.y = (inter.getIntersectPoint_left().y + inter
+					.getIntersectPoint_right().y) / 2;
+			Coordinate a[] = line_circle_intersect(circle, mid);
+			Coordinate arcmid = new Coordinate();
+			if (isinCircle(a[0], c))
+				arcmid = a[0];
+			else
+				arcmid = a[1];
+			double angle0 = getSlantangle(circle.getCoordinate(),
+					inter.getIntersectPoint_left());
+			double angle1 = getSlantangle(circle.getCoordinate(),
+					inter.getIntersectPoint_right());
+			double angle2 = getSlantangle(circle.getCoordinate(), arcmid);
+			angle_coordinate.put(angle0, inter.getIntersectPoint_left());
+			angle_coordinate.put(angle1, inter.getIntersectPoint_right());
+			if (angle2 < Math.min(angle0, angle1)
+					|| angle2 > Math.max(angle0, angle1)) {
+				double b1[] = new double[2];
+				b1[0] = 0;
+				b1[1] = Math.min(angle0, angle1);
+				coverangle.add(b1);
+				double b2[] = new double[2];
+				b2[0] = Math.max(angle0, angle1);
+				b2[1] = 360;
+				coverangle.add(b2);
+			} else {
+				double b3[] = new double[2];
+				b3[0] = Math.min(angle0, angle1);
+				b3[1] = Math.max(angle0, angle1);
+				coverangle.add(b3);
+			}
+			
+		}
+		// add a virtual angle
+		double b4[] = new double[2];
+		b4[0] = b4[1] = 360;
+		coverangle.add(b4);
+		Coordinate end = new Coordinate(circle.getCoordinate().x
+				+ circle.getRadius(), circle.getCoordinate().y);
+		angle_coordinate.put(b4[0], end);
+		// sort the cover arc
+		int minindex = 0;
+		for (int j = 0; j < coverangle.size() - 1; j++) {
+			minindex = j;
+			for (int k = j + 1; k < coverangle.size(); k++) {
+				if (coverangle.get(minindex)[0] > coverangle.get(k)[0]) {
+					minindex = k;
+				}
+			}
+			double tem[] = new double[2];
+			tem = coverangle.get(j);
+			coverangle.set(j, coverangle.get(minindex));
+			coverangle.set(minindex, tem);
+		}
+		// find the uncover arc
+		int startposition = 0;
+		while (startposition < coverangle.size() - 1) {
+			double coverArc[] = coverangle.get(startposition);
+			boolean stop = false;
+			int m = 0;
+			for (m = startposition + 1; m < coverangle.size() && !stop; m++) {
+				double bb[] = coverangle.get(m);
+				if (bb[0] <= coverArc[1]) {
+					coverArc[0] = Math.min(coverArc[0], bb[0]);
+					coverArc[1] = Math.max(coverArc[1], bb[1]);
+				} else {
+					Coordinate uncover[]=new Coordinate[2];
+					//record the consistant uncover angle
+					Double[] uncoverA=new Double[2];
+					uncoverA[0]=coverArc[1];
+					uncoverA[1]=bb[0];
+					Iterator<Map.Entry<Double, Coordinate>> entries = angle_coordinate
+							.entrySet().iterator();
+					while (entries.hasNext()) {
+						Map.Entry<Double, Coordinate> entry = entries.next();
+						if (entry.getKey() == coverArc[1])
+							uncover[0] = entry.getValue();
+						else if (entry.getKey() == bb[0])
+							uncover[1] = entry.getValue();
+					}
+					uncoverArc.put(uncoverA, uncover);
+					startposition = m;
+					stop = true;
+				}
+			}
+			if(m==coverangle.size()){
+				startposition=m;
+			}
+		}
+		return uncoverArc;
+	}
+
+	public double getSlantangle(Coordinate centerP, Coordinate p2) {
+		double slantangle = 0;
+		if (p2.x == centerP.x) {
+			if (p2.y >= centerP.y) {
+				slantangle=90;
+			} else {
+				slantangle=270;
+			}
+		} 
+		else if(p2.y==centerP.y){
+			if(p2.x>=centerP.x){
+				slantangle=0;
+			}
+			else slantangle=180;
+			
+		}else {
+			double k = (p2.y - centerP.y) / (p2.x - centerP.x);
+			slantangle = Math.atan(k);
+			if(p2.x>centerP.x){
+				//1st and 4th quadrant
+				slantangle=(Math.toDegrees(slantangle)+360)%360;
+			}
+			if(p2.x<centerP.x){
+				//2nd and 3rd quadrant
+				slantangle=Math.toDegrees(slantangle)+180;
+			}
+		}
+		
+		
+		return slantangle;
+	}
+	
+	public Coordinate[] line_circle_intersect(VQP circle, Coordinate p) {
+		Coordinate startPoint = circle.getCoordinate();
+		double radius = circle.getRadius();
+		Coordinate[] a = new Coordinate[2];
+		a[0] = new Coordinate();
+		a[1] = new Coordinate();
+		// the slope of the line:k=infinite
+		if (p.x == startPoint.x) {
+			a[0].x = startPoint.x;
+			a[0].y = startPoint.y + radius;
+			a[1].x = startPoint.x;
+			a[1].y = startPoint.y - radius;
+		}
+		// k=0
+		else if (p.y == startPoint.y) {
+			a[0].x = startPoint.x + radius;
+			a[0].y = startPoint.y;
+			a[1].x = startPoint.x - radius;
+			a[1].y = startPoint.y;
+		} else {
+			double k = (p.y - startPoint.y) / (p.x - startPoint.x);
+			double A = Math.sqrt((radius * radius) / (1 + k * k));
+			a[0].x = startPoint.x + A;
+			a[0].y = startPoint.y + k * A;
+			a[1].x = startPoint.x - A;
+			a[1].y = startPoint.y - k * A;
+		}
+		return a;
+	}
+
+
 }
