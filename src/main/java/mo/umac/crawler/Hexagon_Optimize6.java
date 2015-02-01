@@ -49,6 +49,7 @@ public class Hexagon_Optimize6 extends Strategy {
 	// @param visitedcircle_Queue: record the information(coordinate,radius)of
 	// the visited points
 	private static LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
+	private static Coordinate levelstartPinHex=new Coordinate();
 
 	public Hexagon_Optimize6() {
 		startPoint.x = -73.355835;
@@ -268,9 +269,11 @@ public class Hexagon_Optimize6 extends Strategy {
 				neighborList.add(neighbor);
 			}			
 		}
+		//cover the periphery of the circle
 		Map<Double[], Coordinate[]>uncoverArc=findUncoverarc(circle, neighborList);
-		Iterator<Map.Entry<Double[], Coordinate[]>>it=uncoverArc.entrySet().iterator();
-		while(it.hasNext()){
+		int uncoversize=uncoverArc.size();
+		while(uncoversize>0){
+			Iterator<Map.Entry<Double[], Coordinate[]>>it=uncoverArc.entrySet().iterator();
 			Map.Entry<Double[], Coordinate[]>entry=it.next();
 			Coordinate mid=new Coordinate();
 		    mid.x=(entry.getValue()[0].x+entry.getValue()[1].x)/2;
@@ -283,6 +286,7 @@ public class Hexagon_Optimize6 extends Strategy {
 		    	midarc=a[0];
 		    }
 		    else midarc=a[1];
+		    uncoverArc.remove(entry.getKey());
 		    //issue the query 
 		    AQuery aquery=new AQuery(midarc, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
 		    ResultSetD2 aresult=query(aquery);
@@ -291,6 +295,12 @@ public class Hexagon_Optimize6 extends Strategy {
 		    double midradius=midarc.distance(aresult.getPOIs().get(aresult.getPOIs().size()-1).getCoordinate());
 		    VQP newneighbor=new VQP(midarc, midradius);
 		    neighborList.add(newneighbor);
+		    uncoverArc=findUncoverarc(circle, neighborList);
+		}
+		//calculate the cover radius
+		coverradius=calculateIncircle(circle.getCoordinate(), circle.getRadius(), visitedcircle_Queue);
+		if(coverradius<radius){
+			
 		}
 		return coverradius;
 	}
@@ -350,8 +360,9 @@ public class Hexagon_Optimize6 extends Strategy {
 	/*
 	 * algorithm 1 To calculate the maximum inscribed circle of a given area
 	 */
-	public double calculateIncircle(Coordinate startPoint, double radius,
+	public double calculateIncircle(Coordinate startPoint,double radius,Coordinate levelstartPoint,
 			LinkedList<VQP> visitedcircle_Queue) {
+		Coordinate s=new Coordinate();
 		double minRadius = 1e308;
 		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {
 			VQP circle1 = visitedcircle_Queue.get(i);
@@ -384,8 +395,7 @@ public class Hexagon_Optimize6 extends Strategy {
 					if(isinCircle(temP, firstcircle))
 						in=true;
 					Iterator<VQP> it = visitedcircle_Queue.iterator();
-					while (it.hasNext()) {
-						if(!in){
+					while (it.hasNext() && !in) {
 						VQP circle3 = it.next();
 						if (!circle1.getCoordinate().equals2D(
 								circle3.getCoordinate())
@@ -396,14 +406,16 @@ public class Hexagon_Optimize6 extends Strategy {
 							}
 						}
 					}
-					}
 					if (!in) {
-						minRadius = Math.min(minRadius,
-								temP.distance(startPoint));
+						if(minRadius>temP.distance(startPoint)){
+						   s=temP;
+						}
+						minRadius = Math.min(minRadius,	temP.distance(startPoint));
 					}
 				}
 			}
 		}
+		levelstartPoint=s;
 		return minRadius;
 	}
 

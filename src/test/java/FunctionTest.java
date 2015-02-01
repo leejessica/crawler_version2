@@ -29,6 +29,8 @@ public class FunctionTest extends Strategy {
 
 	public static double key = 0.97;
 	public static double sqrt3 = Math.sqrt(3);
+	
+	private static Coordinate levelstartPoint=new Coordinate();
 
 	@Override
 	public void crawl(String state, int category, String query,
@@ -39,7 +41,7 @@ public class FunctionTest extends Strategy {
 	public static void main(String arg[]) {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		FunctionTest test = new FunctionTest();
-		PaintShapes.painting = false;
+		PaintShapes.painting = true;
 		if (PaintShapes.painting) {
 			WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		}
@@ -56,128 +58,160 @@ public class FunctionTest extends Strategy {
 			PaintShapes.paint.myRepaint();
 		}
 		
-		Map<Double, Coordinate>angle_coordinate=new HashMap<Double, Coordinate>();
-		LinkedList<double[]>coverangle=new LinkedList<double[]>();
-		Map<Double[], Coordinate[]>uncoverArc=new HashMap<Double[], Coordinate[]>();
-		double a1[]=new double[2];
-		a1[0]=80;
-		a1[1]=100;
-		angle_coordinate.put(a1[0], new Coordinate(1, 0));
-		angle_coordinate.put(a1[1], new Coordinate(0, 1));
-		coverangle.add(a1);
-		double a2[]=new double[2];
-		a2[0]=0;
-		a2[1]=30;
-		angle_coordinate.put(a2[0], new Coordinate(2, 0));
-		angle_coordinate.put(a2[1], new Coordinate(0, 2));
-		coverangle.add(a2);
-		double a3[]=new double[2];
-		a3[0]=330;
-		a3[1]=360;
-		angle_coordinate.put(a3[0], new Coordinate(3, 0));
-		angle_coordinate.put(a3[1], new Coordinate(7, 7));
-		coverangle.add(a3);
-		double a4[]=new double[2];
-		a4[0]=20;
-		a4[1]=90;
-		angle_coordinate.put(a4[0], new Coordinate(4, 0));
-		angle_coordinate.put(a4[1], new Coordinate(0, 4));
-		coverangle.add(a4);
-		double a5[]=new double[2];
-		a5[0]=180;
-		a5[1]=240;
-		angle_coordinate.put(a5[0], new Coordinate(5, 0));
-		angle_coordinate.put(a5[1], new Coordinate(0, 5));
-		coverangle.add(a5);
-		double a6[]=new double[2];
-		a6[0]=270;
-		a6[1]=300;
-		angle_coordinate.put(a6[0], new Coordinate(6, 0));
-		angle_coordinate.put(a6[1], new Coordinate(0, 6));
-		coverangle.add(a6);
-		double a7[]=new double[2];
-		a7[0]=360;
-		a7[1]=360;
-		angle_coordinate.put(a7[0], new Coordinate(7, 7));
-		angle_coordinate.put(a7[1], new Coordinate(7, 7));
-		coverangle.add(a7);
-		// sort the cover arc
-		int minindex = 0;
-		for (int j = 0; j < coverangle.size() - 1; j++) {
-			minindex = j;
-			for (int k = j + 1; k < coverangle.size(); k++) {
-				if (coverangle.get(minindex)[0] > coverangle.get(k)[0]) {
-					minindex = k;
-				}
-			}
-			double tem[] = new double[2];
-			tem = coverangle.get(j);
-			coverangle.set(j, coverangle.get(minindex));
-			coverangle.set(minindex, tem);
-		}
-		for(int ii=0;ii<coverangle.size();ii++){
-			double aa[]=coverangle.get(ii);
-			System.out.println(aa[0]+"  "+aa[1]);
-		}
-		System.out.println("----------------------------");
-		// find the uncover arc
-		int startposition = 0;
-		while (startposition < coverangle.size() - 1) {
-			double coverArc[] = coverangle.get(startposition);
-			boolean stop = false;
-			int m = 0;
-			for (m = startposition + 1; m < coverangle.size() && !stop; m++) {
-				double bb[] = coverangle.get(m);
-				if (bb[0] <= coverArc[1]) {
-					coverArc[0] = Math.min(coverArc[0], bb[0]);
-					coverArc[1] = Math.max(coverArc[1], bb[1]);
-				} else {
-					Coordinate uncover[]=new Coordinate[2];
-					//record the consistant uncover angle
-					Double[] uncoverA=new Double[2];
-					uncoverA[0]=coverArc[1];
-					uncoverA[1]=bb[0];
-					Iterator<Map.Entry<Double, Coordinate>> entries = angle_coordinate
-							.entrySet().iterator();
-					while (entries.hasNext()) {
-						Map.Entry<Double, Coordinate> entry = entries.next();
-						if (entry.getKey() == coverArc[1])
-							uncover[0] = entry.getValue();
-						else if (entry.getKey() == bb[0])
-							uncover[1] = entry.getValue();
-					}
-					uncoverArc.put(uncoverA, uncover);
-					startposition = m;
-					stop = true;
-				}
-			}
-			if(m==coverangle.size()){
-				startposition=m;
-			}
-		}
-	
-		System.out.println(uncoverArc.entrySet().size());
-		Iterator<Map.Entry<Double[],Coordinate[]>>it=uncoverArc.entrySet().iterator();
-		while(it.hasNext()){
-			Map.Entry<Double[], Coordinate[]>newneighbor=it.next();
-			System.out.println(newneighbor.getKey()[0]+"   "+newneighbor.getValue()[0]);
-			System.out.println(newneighbor.getKey()[1]+"   "+newneighbor.getValue()[1]);
+//		Map<Double, Coordinate>angle_coordinate=new HashMap<Double, Coordinate>();
+//		LinkedList<double[]>coverangle=new LinkedList<double[]>();
+//		Map<Double[], Coordinate[]>uncoverArc=new HashMap<Double[], Coordinate[]>();
+//		double a1[]=new double[2];
+//		a1[0]=80;
+//		a1[1]=100;
+//		angle_coordinate.put(a1[0], new Coordinate(1, 0));
+//		angle_coordinate.put(a1[1], new Coordinate(0, 1));
+//		coverangle.add(a1);
+//		double a2[]=new double[2];
+//		a2[0]=0;
+//		a2[1]=30;
+//		angle_coordinate.put(a2[0], new Coordinate(2, 0));
+//		angle_coordinate.put(a2[1], new Coordinate(0, 2));
+//		coverangle.add(a2);
+//		double a3[]=new double[2];
+//		a3[0]=330;
+//		a3[1]=360;
+//		angle_coordinate.put(a3[0], new Coordinate(3, 0));
+//		angle_coordinate.put(a3[1], new Coordinate(7, 7));
+//		coverangle.add(a3);
+//		double a4[]=new double[2];
+//		a4[0]=20;
+//		a4[1]=90;
+//		angle_coordinate.put(a4[0], new Coordinate(4, 0));
+//		angle_coordinate.put(a4[1], new Coordinate(0, 4));
+//		coverangle.add(a4);
+//		double a5[]=new double[2];
+//		a5[0]=180;
+//		a5[1]=240;
+//		angle_coordinate.put(a5[0], new Coordinate(5, 0));
+//		angle_coordinate.put(a5[1], new Coordinate(0, 5));
+//		coverangle.add(a5);
+//		double a6[]=new double[2];
+//		a6[0]=270;
+//		a6[1]=300;
+//		angle_coordinate.put(a6[0], new Coordinate(6, 0));
+//		angle_coordinate.put(a6[1], new Coordinate(0, 6));
+//		coverangle.add(a6);
+//		double a7[]=new double[2];
+//		a7[0]=360;
+//		a7[1]=360;
+//		angle_coordinate.put(a7[0], new Coordinate(7, 7));
+//		angle_coordinate.put(a7[1], new Coordinate(7, 7));
+//		coverangle.add(a7);
+//		// sort the cover arc
+//		int minindex = 0;
+//		for (int j = 0; j < coverangle.size() - 1; j++) {
+//			minindex = j;
+//			for (int k = j + 1; k < coverangle.size(); k++) {
+//				if (coverangle.get(minindex)[0] > coverangle.get(k)[0]) {
+//					minindex = k;
+//				}
+//			}
+//			double tem[] = new double[2];
+//			tem = coverangle.get(j);
+//			coverangle.set(j, coverangle.get(minindex));
+//			coverangle.set(minindex, tem);
+//		}
+//		for(int ii=0;ii<coverangle.size();ii++){
+//			double aa[]=coverangle.get(ii);
+//			System.out.println(aa[0]+"  "+aa[1]);
+//		}
+//		System.out.println("----------------------------");
+//		// find the uncover arc
+//		int startposition = 0;
+//		while (startposition < coverangle.size() - 1) {
+//			double coverArc[] = coverangle.get(startposition);
+//			boolean stop = false;
+//			int m = 0;
+//			for (m = startposition + 1; m < coverangle.size() && !stop; m++) {
+//				double bb[] = coverangle.get(m);
+//				if (bb[0] <= coverArc[1]) {
+//					coverArc[0] = Math.min(coverArc[0], bb[0]);
+//					coverArc[1] = Math.max(coverArc[1], bb[1]);
+//				} else {
+//					Coordinate uncover[]=new Coordinate[2];
+//					//record the consistant uncover angle
+//					Double[] uncoverA=new Double[2];
+//					uncoverA[0]=coverArc[1];
+//					uncoverA[1]=bb[0];
+//					Iterator<Map.Entry<Double, Coordinate>> entries = angle_coordinate
+//							.entrySet().iterator();
+//					while (entries.hasNext()) {
+//						Map.Entry<Double, Coordinate> entry = entries.next();
+//						if (entry.getKey() == coverArc[1])
+//							uncover[0] = entry.getValue();
+//						else if (entry.getKey() == bb[0])
+//							uncover[1] = entry.getValue();
+//					}
+//					uncoverArc.put(uncoverA, uncover);
+//					startposition = m;
+//					stop = true;
+//				}
+//			}
+//			if(m==coverangle.size()){
+//				startposition=m;
+//			}
+//		}
+//	
+//		System.out.println(uncoverArc.entrySet().size());
+//		int n=uncoverArc.entrySet().size();
+//		int k=2;
+//		while(n>0){
+//			Iterator<Map.Entry<Double[],Coordinate[]>>it=uncoverArc.entrySet().iterator();
+//			Map.Entry<Double[], Coordinate[]>newneighbor=it.next();
+//			System.out.println(newneighbor.getKey()[0]+"   "+newneighbor.getValue()[0]);
+//			System.out.println(newneighbor.getKey()[1]+"   "+newneighbor.getValue()[1]);
+//		    uncoverArc.remove(newneighbor.getKey());
+//		    
+//		if(k==2){
+//		Double[] a8=new Double[2];
+//		a8[0]=(double)450;
+//		a8[1]=(double)500;
+//		Coordinate a9[]=new Coordinate[2];
+//		a9[0]=new Coordinate(9, 0);
+//		a9[1]=new Coordinate(0, 9);
+//		uncoverArc.put(a8, a9);
+//		k++;
+//		}
+//		n=uncoverArc.entrySet().size();
+//		System.out.println("new size="+uncoverArc.entrySet().size());
+//		}
+//			
+			
 		
-		int k=2;
-		if(k==2){
-		Double[] a8=new Double[2];
-		a8[0]=(double)450;
-		a8[1]=(double)500;
-		Coordinate a9[]=new Coordinate[2];
-		a9[0]=new Coordinate(9, 0);
-		a9[1]=new Coordinate(0, 9);
-		uncoverArc.put(a8, a9);
-		k++;
-		}
-		System.out.println("new size="+uncoverArc.entrySet().size());
-		}
+		/***************new test*************************************/
+		Coordinate startPoint=new Coordinate(500, 500);
+		LinkedList<VQP>visitedcircle_Queue=new LinkedList<VQP>();
+		visitedcircle_Queue.add(new VQP(new Coordinate(500, 500), 45));
+		visitedcircle_Queue.add(new VQP(new Coordinate(589, 540), 67));
+		visitedcircle_Queue.add(new VQP(new Coordinate(500, 550), 95));
+		visitedcircle_Queue.add(new VQP(new Coordinate(439, 560), 124));
+		visitedcircle_Queue.add(new VQP(new Coordinate(460, 478), 69));
+		visitedcircle_Queue.add(new VQP(new Coordinate(580, 580), 70));
+		Iterator<VQP>testiterator=visitedcircle_Queue.iterator();
+		while(testiterator.hasNext()){
+			VQP m1=testiterator.next();
+			Circle tm=new Circle(m1.getCoordinate(), m1.getRadius());
+			if (PaintShapes.painting && logger.isDebugEnabled()) {
+				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+				PaintShapes.paint.addCircle(tm);
+				PaintShapes.paint.myRepaint();
+			}
 			
-			
+		}
+		double coverradius=calculateIncircle(startPoint, visitedcircle_Queue);
+		Circle incircle=new Circle(startPoint, coverradius);
+		if (PaintShapes.painting && logger.isDebugEnabled()) {
+			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			PaintShapes.paint.addCircle(incircle);
+			PaintShapes.paint.myRepaint();
+		}
+		/***************end test*************************************/
 		
 		System.out.println("end calling!");
 	}
@@ -548,62 +582,62 @@ public class FunctionTest extends Strategy {
 		return intersect;
 	}
 
-	public double calculateIncircle(Coordinate startPoint, double radius,
-			LinkedList<VQP> visitedcircle_Queue) {
-		double minRadius = 1e308;
-		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {
-			VQP circle1 = visitedcircle_Queue.get(i);
-			for (int j = i + 1; j < visitedcircle_Queue.size(); j++) {
-				VQP circle2 = visitedcircle_Queue.get(j);
-
-				double dr = circle1.getRadius() - circle2.getRadius();
-				// circle1 contain circle2, no need processing circle2
-				if (dr > 0 && circle_contain(circle1, circle2)) {
-					continue;
-				}
-				// circle2 contain circle1, no need processing circle1
-				else if (dr < 0 && circle_contain(circle2, circle1)) {
-					break;
-				} else if (circles_Insecter(circle1, circle2)) {
-					IntersectPoint inter = calculateIntersectPoint(circle1,
-							circle2);
-					double d1 = inter.getIntersectPoint_left().distance(
-							startPoint);
-					double d2 = inter.getIntersectPoint_right().distance(
-							startPoint);
-					Coordinate temP = new Coordinate();
-					if (d1 > d2)
-						temP = inter.getIntersectPoint_left();
-					else
-						temP = inter.getIntersectPoint_right();
-					// test if the temP is inside another circle
-					boolean in = false;
-					VQP firstcircle = new VQP(startPoint, radius);
-					if (isinCircle(temP, firstcircle))
-						in = true;
-					Iterator<VQP> it = visitedcircle_Queue.iterator();
-					while (it.hasNext()) {
-						if (!in) {
-							VQP circle3 = it.next();
-							if (!circle1.getCoordinate().equals2D(
-									circle3.getCoordinate())
-									&& !circle2.getCoordinate().equals2D(
-											circle3.getCoordinate())) {
-								if (isinCircle(temP, circle3)) {
-									in = true;
-								}
-							}
-						}
-					}
-					if (!in) {
-						minRadius = Math.min(minRadius,
-								temP.distance(startPoint));
-					}
-				}
-			}
-		}
-		return minRadius;
-	}
+//	public double calculateIncircle(Coordinate startPoint, double radius,
+//			LinkedList<VQP> visitedcircle_Queue) {
+//		double minRadius = 1e308;
+//		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {
+//			VQP circle1 = visitedcircle_Queue.get(i);
+//			for (int j = i + 1; j < visitedcircle_Queue.size(); j++) {
+//				VQP circle2 = visitedcircle_Queue.get(j);
+//
+//				double dr = circle1.getRadius() - circle2.getRadius();
+//				// circle1 contain circle2, no need processing circle2
+//				if (dr > 0 && circle_contain(circle1, circle2)) {
+//					continue;
+//				}
+//				// circle2 contain circle1, no need processing circle1
+//				else if (dr < 0 && circle_contain(circle2, circle1)) {
+//					break;
+//				} else if (circles_Insecter(circle1, circle2)) {
+//					IntersectPoint inter = calculateIntersectPoint(circle1,
+//							circle2);
+//					double d1 = inter.getIntersectPoint_left().distance(
+//							startPoint);
+//					double d2 = inter.getIntersectPoint_right().distance(
+//							startPoint);
+//					Coordinate temP = new Coordinate();
+//					if (d1 > d2)
+//						temP = inter.getIntersectPoint_left();
+//					else
+//						temP = inter.getIntersectPoint_right();
+//					// test if the temP is inside another circle
+//					boolean in = false;
+//					VQP firstcircle = new VQP(startPoint, radius);
+//					if (isinCircle(temP, firstcircle))
+//						in = true;
+//					Iterator<VQP> it = visitedcircle_Queue.iterator();
+//					while (it.hasNext()) {
+//						if (!in) {
+//							VQP circle3 = it.next();
+//							if (!circle1.getCoordinate().equals2D(
+//									circle3.getCoordinate())
+//									&& !circle2.getCoordinate().equals2D(
+//											circle3.getCoordinate())) {
+//								if (isinCircle(temP, circle3)) {
+//									in = true;
+//								}
+//							}
+//						}
+//					}
+//					if (!in) {
+//						minRadius = Math.min(minRadius,
+//								temP.distance(startPoint));
+//					}
+//				}
+//			}
+//		}
+//		return minRadius;
+//	}
 
 	public boolean circle_contain(VQP circle1, VQP circle2) {
 		double d1 = circle1.getCoordinate().distance(circle2.getCoordinate());
@@ -751,10 +785,96 @@ public class FunctionTest extends Strategy {
 				//2nd and 3rd quadrant
 				slantangle=Math.toDegrees(slantangle)+180;
 			}
-		}
-		
-		
+		}				
 		return slantangle;
 	}
-
+	
+	public double calculateIncircle(Coordinate startPoint,
+			LinkedList<VQP> visitedcircle_Queue) {
+		Coordinate s=new Coordinate();
+		double minRadius = 1e308;
+		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {
+			System.out.println("i="+i);
+			VQP circle1 = visitedcircle_Queue.get(i);
+			for (int j = i + 1; j < visitedcircle_Queue.size(); j++) {
+				System.out.println("j="+j);
+				VQP circle2 = visitedcircle_Queue.get(j);
+				double dr = circle1.getRadius() - circle2.getRadius();
+				// circle1 contain circle2, no need processing circle
+				if (dr > 0 && circle_contain(circle1, circle2)) {
+					System.out.println("circle1="+circle1.getCoordinate().toString()+"  "+circle1.getRadius());
+					System.out.println("circle2="+circle2.getCoordinate().toString()+"  "+circle2.getRadius());
+					System.out.println("circle1 contains circle2");
+					continue;
+				}
+				// circle2 contain circle1, no need processing circle1
+				 if (dr < 0 && circle_contain(circle2, circle1)) {
+					 System.out.println("circle1="+circle1.getCoordinate().toString()+"  "+circle1.getRadius());
+					 System.out.println("circle2="+circle2.getCoordinate().toString()+"  "+circle2.getRadius());
+					 System.out.println("circle2 contains circle1");
+					break;
+				} 
+				 if (circles_Insecter(circle1, circle2)) {
+					IntersectPoint inter = calculateIntersectPoint(circle1,
+							circle2);
+				    boolean leftin=false;				
+					boolean rightin = false;
+//					VQP firstcircle=new VQP(startPoint, radius);
+//					if(isinCircle(temP, firstcircle))
+//						in=true;					
+					System.out.println("circle1 intsects with circle2");
+					System.out.println("left="+inter.getIntersectPoint_left()+
+							"  right="+inter.getIntersectPoint_right());
+					System.out.println("circle1="+circle1.getCoordinate().toString()+"  "+circle1.getRadius());
+					System.out.println("circle2="+circle2.getCoordinate().toString()+"  "+circle2.getRadius());
+					Iterator<VQP> it = visitedcircle_Queue.iterator();
+					while (it.hasNext()) {
+						VQP circle3 = it.next();
+						if (!circle1.getCoordinate().equals2D(
+								circle3.getCoordinate())
+								&& !circle2.getCoordinate().equals2D(
+										circle3.getCoordinate())) {
+							if (!leftin&&isinCircle(inter.getIntersectPoint_left(), circle3)) {
+								leftin = true;																														
+							}
+							if(!rightin&&isinCircle(inter.getIntersectPoint_right(), circle3)){
+								rightin=true;
+							}
+						}
+					}
+					
+					if(!leftin&&rightin){
+						double d1=startPoint.distance(inter.getIntersectPoint_left());
+						if(d1<minRadius){
+							s=inter.getIntersectPoint_left();
+							minRadius=d1;
+						}
+					}
+					if(leftin&&!rightin){
+						double d2=startPoint.distance(inter.getIntersectPoint_right());
+						if(d2<minRadius){
+							s=inter.getIntersectPoint_left();
+							minRadius=d2;
+						}
+					}
+					if(!leftin&&!rightin){
+						double d3=startPoint.distance(inter.getIntersectPoint_left());
+						double d4=startPoint.distance(inter.getIntersectPoint_right());
+						if(d3<d4&&d3<minRadius){
+							s=inter.getIntersectPoint_left();
+							minRadius=d3;
+						}
+						if(d4<d3&&d4<minRadius){
+							s=inter.getIntersectPoint_left();
+							minRadius=d4;
+						}
+					}
+				  }
+			}
+			System.out.println("s="+s);
+			System.out.println("=============================");
+		}
+		levelstartPoint=s;
+		return minRadius;
+	}
 }

@@ -38,7 +38,7 @@ public class Periphery_Optimize2 extends Strategy{
 	
 	private static Set<APOI> queryset = new HashSet<APOI>();// record all points queried
 	private static Set<APOI> eligibleset= new HashSet<APOI>(); //record all eligible points
-	private static LinkedHashSet<VQP> visitedcircle_Queue=new LinkedHashSet<VQP>();//record all the query circle
+	private static LinkedList<VQP> visitedcircle_Queue=new LinkedList<VQP>();//record all the query circle
 	private static Coordinate levelstartPoint=new Coordinate();//record the start point of every level 
 	
 	private static double firstradius=0; 
@@ -87,7 +87,7 @@ public class Periphery_Optimize2 extends Strategy{
 		Coordinate farthestCoordinate = farthest.getCoordinate();
 		firstradius = startPoint.distance(farthestCoordinate);
 		inRadius=firstradius;
-		visitedcircle_Queue.add(new VQP(startPoint, inRadius));
+		visitedcircle_Queue.add(new VQP(startPoint, firstradius));
 		//
 		Circle aCircle = new Circle(startPoint, inRadius);
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -99,6 +99,7 @@ public class Periphery_Optimize2 extends Strategy{
         levelstartPoint.y=startPoint.y+inRadius;
         //record all the issued query except the first one
         LinkedList<VQP> visited_Queue=new LinkedList<VQP>();
+        logger.info("countPoint="+countPoint+"  countquery="+countquery);
         if(countPoint<NEED_POINTS_NUM){
         	onelevelQuery(state, category, query, visited_Queue);
             logger.info("countPoint="+countPoint+"  countquery="+countquery);
@@ -118,7 +119,7 @@ public class Periphery_Optimize2 extends Strategy{
     			PaintShapes.paint.addCircle(aaaCircle);
     			PaintShapes.paint.myRepaint();
     		}
-        	inRadius=calculateIncircle(startPoint,firstradius, visited_Queue);
+        	inRadius=calculateIncircle(startPoint, visitedcircle_Queue);
         	Iterator<APOI>iterator=queryset.iterator();
         	while(iterator.hasNext()){
         		APOI continueAPOI=iterator.next();
@@ -293,7 +294,7 @@ public class Periphery_Optimize2 extends Strategy{
 				}
 			}
 		}
-		inRadius=calculateIncircle(startPoint, firstradius, visited_Queue);
+		inRadius=calculateIncircle(startPoint, visitedcircle_Queue);
 		Circle Circle11 = new Circle(startPoint, inRadius);
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
 			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
@@ -436,59 +437,132 @@ public class Periphery_Optimize2 extends Strategy{
 		return flag;
 	}
 	
-	public double calculateIncircle(Coordinate startPoint,double radius,
+//	public double calculateIncircle(Coordinate startPoint,double radius,
+//			LinkedList<VQP> visitedcircle_Queue) {
+//		Coordinate s=new Coordinate();
+//		double minRadius = 1e308;
+//		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {
+//			VQP circle1 = visitedcircle_Queue.get(i);
+//			for (int j = i + 1; j < visitedcircle_Queue.size(); j++) {
+//				VQP circle2 = visitedcircle_Queue.get(j);
+//
+//				double dr = circle1.getRadius() - circle2.getRadius();
+//				// circle1 contain circle2, no need processing circle2
+//				if (dr > 0 && circle_contain(circle1, circle2)) {
+//					continue;
+//				}
+//				// circle2 contain circle1, no need processing circle1
+//				else if (dr < 0 && circle_contain(circle2, circle1)) {
+//					break;
+//				} else if (circles_Insecter(circle1, circle2)) {
+//					IntersectPoint inter = calculateIntersectPoint(circle1,
+//							circle2);
+//					double d1 = inter.getIntersectPoint_left().distance(
+//							startPoint);
+//					double d2 = inter.getIntersectPoint_right().distance(
+//							startPoint);
+//					Coordinate temP = new Coordinate();
+//					if (d1 > d2)
+//						temP = inter.getIntersectPoint_left();
+//					else
+//						temP = inter.getIntersectPoint_right();
+//					// test if the temP is inside another circle
+//					boolean in = false;
+//					VQP firstcircle=new VQP(startPoint, radius);
+//					if(isinCircle(temP, firstcircle))
+//						in=true;
+//					Iterator<VQP> it = visitedcircle_Queue.iterator();
+//					while (it.hasNext() && !in) {
+//						VQP circle3 = it.next();
+//						if (!circle1.getCoordinate().equals2D(
+//								circle3.getCoordinate())
+//								&& !circle2.getCoordinate().equals2D(
+//										circle3.getCoordinate())) {
+//							if (isinCircle(temP, circle3)) {
+//								in = true;
+//							}
+//						}
+//					}
+//					if (!in) {
+//						if(minRadius>temP.distance(startPoint)){
+//						   s=temP;
+//						}
+//						minRadius = Math.min(minRadius,	temP.distance(startPoint));
+//					}
+//				}
+//			}
+//		}
+//		levelstartPoint=s;
+//		return minRadius;
+//	}
+	
+	public double calculateIncircle(Coordinate startPoint,
 			LinkedList<VQP> visitedcircle_Queue) {
 		Coordinate s=new Coordinate();
 		double minRadius = 1e308;
-		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {
+		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {			
 			VQP circle1 = visitedcircle_Queue.get(i);
 			for (int j = i + 1; j < visitedcircle_Queue.size(); j++) {
 				VQP circle2 = visitedcircle_Queue.get(j);
-
 				double dr = circle1.getRadius() - circle2.getRadius();
-				// circle1 contain circle2, no need processing circle2
+				// circle1 contain circle2, no need processing circle
 				if (dr > 0 && circle_contain(circle1, circle2)) {
 					continue;
 				}
 				// circle2 contain circle1, no need processing circle1
-				else if (dr < 0 && circle_contain(circle2, circle1)) {
+				 if (dr < 0 && circle_contain(circle2, circle1)) {
+					
 					break;
-				} else if (circles_Insecter(circle1, circle2)) {
+				} 
+				 if (circles_Insecter(circle1, circle2)) {
 					IntersectPoint inter = calculateIntersectPoint(circle1,
 							circle2);
-					double d1 = inter.getIntersectPoint_left().distance(
-							startPoint);
-					double d2 = inter.getIntersectPoint_right().distance(
-							startPoint);
-					Coordinate temP = new Coordinate();
-					if (d1 > d2)
-						temP = inter.getIntersectPoint_left();
-					else
-						temP = inter.getIntersectPoint_right();
-					// test if the temP is inside another circle
-					boolean in = false;
-					VQP firstcircle=new VQP(startPoint, radius);
-					if(isinCircle(temP, firstcircle))
-						in=true;
+				    boolean leftin=false;				
+					boolean rightin = false;
+			
 					Iterator<VQP> it = visitedcircle_Queue.iterator();
-					while (it.hasNext() && !in) {
+					while (it.hasNext()) {
 						VQP circle3 = it.next();
 						if (!circle1.getCoordinate().equals2D(
 								circle3.getCoordinate())
 								&& !circle2.getCoordinate().equals2D(
 										circle3.getCoordinate())) {
-							if (isinCircle(temP, circle3)) {
-								in = true;
+							if (isinCircle(inter.getIntersectPoint_left(), circle3)) {
+								leftin = true;																															
+							}
+							if(isinCircle(inter.getIntersectPoint_right(), circle3)){
+								rightin=true;
 							}
 						}
 					}
-					if (!in) {
-						if(minRadius>temP.distance(startPoint)){
-						   s=temP;
+					
+					if(!leftin&&rightin){
+						double d1=startPoint.distance(inter.getIntersectPoint_left());
+						if(d1<minRadius){
+							s=inter.getIntersectPoint_left();
+							minRadius=d1;
 						}
-						minRadius = Math.min(minRadius,	temP.distance(startPoint));
 					}
-				}
+					if(leftin&&!rightin){
+						double d2=startPoint.distance(inter.getIntersectPoint_right());
+						if(d2<minRadius){
+							s=inter.getIntersectPoint_left();
+							minRadius=d2;
+						}
+					}
+					if(!leftin&&!rightin){
+						double d3=startPoint.distance(inter.getIntersectPoint_left());
+						double d4=startPoint.distance(inter.getIntersectPoint_right());
+						if(d3<d4&&d3<minRadius){
+							s=inter.getIntersectPoint_left();
+							minRadius=d3;
+						}
+						if(d4<d3&&d4<minRadius){
+							s=inter.getIntersectPoint_left();
+							minRadius=d4;
+						}
+					}
+				  }
 			}
 		}
 		levelstartPoint=s;
