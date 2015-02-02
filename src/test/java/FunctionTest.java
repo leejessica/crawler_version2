@@ -41,7 +41,7 @@ public class FunctionTest extends Strategy {
 	public static void main(String arg[]) {
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		FunctionTest test = new FunctionTest();
-		PaintShapes.painting = true;
+		PaintShapes.painting = false;
 		if (PaintShapes.painting) {
 			WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		}
@@ -828,7 +828,7 @@ public class FunctionTest extends Strategy {
 					System.out.println("circle1="+circle1.getCoordinate().toString()+"  "+circle1.getRadius());
 					System.out.println("circle2="+circle2.getCoordinate().toString()+"  "+circle2.getRadius());
 					Iterator<VQP> it = visitedcircle_Queue.iterator();
-					while (it.hasNext()) {
+					while (it.hasNext()&&!(leftin&&rightin)) {
 						VQP circle3 = it.next();
 						if (!circle1.getCoordinate().equals2D(
 								circle3.getCoordinate())
@@ -844,6 +844,7 @@ public class FunctionTest extends Strategy {
 					}
 					
 					if(!leftin&&rightin){
+						System.out.println("right in ");
 						double d1=startPoint.distance(inter.getIntersectPoint_left());
 						if(d1<minRadius){
 							s=inter.getIntersectPoint_left();
@@ -851,13 +852,15 @@ public class FunctionTest extends Strategy {
 						}
 					}
 					if(leftin&&!rightin){
+						System.out.println("left in");
 						double d2=startPoint.distance(inter.getIntersectPoint_right());
 						if(d2<minRadius){
-							s=inter.getIntersectPoint_left();
+							s=inter.getIntersectPoint_right();
 							minRadius=d2;
 						}
 					}
 					if(!leftin&&!rightin){
+						System.out.println("both out ");
 						double d3=startPoint.distance(inter.getIntersectPoint_left());
 						double d4=startPoint.distance(inter.getIntersectPoint_right());
 						if(d3<d4&&d3<minRadius){
@@ -865,13 +868,14 @@ public class FunctionTest extends Strategy {
 							minRadius=d3;
 						}
 						if(d4<d3&&d4<minRadius){
-							s=inter.getIntersectPoint_left();
+							s=inter.getIntersectPoint_right();
 							minRadius=d4;
 						}
 					}
 				  }
+				 System.out.println("s="+s.toString());
 			}
-			System.out.println("s="+s);
+			
 			System.out.println("=============================");
 		}
 		levelstartPoint=s;

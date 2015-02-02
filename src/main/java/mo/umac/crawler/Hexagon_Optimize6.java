@@ -37,7 +37,7 @@ public class Hexagon_Optimize6 extends Strategy {
 	 * 
 	 */
 	// public static int recursion = 1;
-	public static int NEED_POINTS_NUMBER = 57584;
+	public static int NEED_POINTS_NUMBER = 40000;
 	public static int countPoint = 0;
 	public static double sqrt3 = Math.sqrt(3);
 	public static double key = 0.95;
@@ -49,6 +49,7 @@ public class Hexagon_Optimize6 extends Strategy {
 	// @param visitedcircle_Queue: record the information(coordinate,radius)of
 	// the visited points
 	private static LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
+	private static LinkedList<VQP>visitedcircle_Queueclone=new LinkedList<VQP>();
 	private static Coordinate levelstartPinHex=new Coordinate();
 
 	public Hexagon_Optimize6() {
@@ -57,7 +58,7 @@ public class Hexagon_Optimize6 extends Strategy {
 //		 startPoint.x=500;
 //		 startPoint.y= 500;
 
-		logger.info("------------HexagonCrawler2_Modify------------");
+		logger.info("------------Hexagon combine with periphery------------");
 	}
 
 	@Override
@@ -144,9 +145,8 @@ public class Hexagon_Optimize6 extends Strategy {
 	public void ununiformlyquery(Coordinate startPoint, Envelope envelopeState,
 			String state, int category, String query) {
 		// record points for next round query
-		LinkedList<VQP> visited_Queue = new LinkedList<VQP>();
 		LinkedList<Coordinate> unvisited_Queue = new LinkedList<Coordinate>();
-		LinkedList<VQP>lowCircle=new LinkedList<VQP>();
+		LinkedList<VQP>lowCirclelist=new LinkedList<VQP>();
 		/* issue the first query */
 		AQuery Firstquery = new AQuery(startPoint, state, category, query,
 				MAX_TOTAL_RESULTS_RETURNED);
@@ -159,6 +159,7 @@ public class Hexagon_Optimize6 extends Strategy {
 		Coordinate farthestCoordinate = farthest.getCoordinate();
 		double distance = startPoint.distance(farthestCoordinate);
 		visitedcircle_Queue.add(new VQP(startPoint, distance));
+		visitedcircle_Queueclone.add(new VQP(startPoint, distance));
 		//
 		Circle aCircle = new Circle(startPoint, distance);
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -192,12 +193,10 @@ public class Hexagon_Optimize6 extends Strategy {
 						double distance1 = p.distance(farthest1Coordinate);
 						double crawl_radius = distance1;
 						visitedcircle_Queue.add(new VQP(p, crawl_radius));
-						visited_Queue.add(new VQP(p, crawl_radius));
-						//record all the need position where need continue issuing query
-						LinkedList<Integer>indexlist=new LinkedList<Integer>();
+						visitedcircle_Queueclone.add(new VQP(p, crawl_radius));
+						//record all the need position where need continue issuing query						
 						if (crawl_radius < radius * key) {
-							lowCircle.add(new VQP(p, crawl_radius));
-							indexlist.add(visited_Queue.size()-1);
+							lowCirclelist.add(new VQP(p, crawl_radius));						
 						}
 						Circle aaCircle = new Circle(p, crawl_radius);
 						if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -205,33 +204,22 @@ public class Hexagon_Optimize6 extends Strategy {
 							PaintShapes.paint.addCircle(aaCircle);
 							PaintShapes.paint.myRepaint();
 						}
-					   for(int i1=0;i1<lowCircle.size();i1++){
-						   VQP lowc=lowCircle.get(i1);
-						   LinkedList<VQP>neighborList=new LinkedList<VQP>();
-						   Iterator<VQP>it1=visitedcircle_Queue.iterator();
-						   while(it1.hasNext()){
-							   VQP neighbor=it1.next();
-							   if(neighbor.getRadius()>0&&circles_Insecter(lowc, neighbor)){
-								   neighborList.add(neighbor);
-							   }
-						   }
-						   Map<Double[], Coordinate[]>uncoverArc=findUncoverarc(lowc, neighborList);
-					   }
-						
 					}
 					/* no need to query! */
 					else {
 						visitedcircle_Queue.add(new VQP(p, 0));
-						visited_Queue.addLast(c);
+						visitedcircle_Queueclone.add(c);
 					}
 				}
 			}
-		    for(int k=0;k<lowCircle.size();k++){
-		    	VQP lc=lowCircle.get(k);
-		    }
+			//cover the hexagon
+			for(int index=0;index<lowCirclelist.size();index++){
+				VQP lowcircle=lowCirclelist.get(index);
+				queryInhexagon(lowcircle,radius, state, category, query);
+			}
+		   lowCirclelist.clear();
 			/* calculate the cover radius */
-			double coverRadius = calculateIncircle(startPoint, radius, visited_Queue);
-			visited_Queue.clear();
+			double coverRadius = calculateIncircle(startPoint,  visitedcircle_Queueclone);
 			Circle circle = new Circle(startPoint, coverRadius);
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
 				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
@@ -295,12 +283,42 @@ public class Hexagon_Optimize6 extends Strategy {
 		    double midradius=midarc.distance(aresult.getPOIs().get(aresult.getPOIs().size()-1).getCoordinate());
 		    VQP newneighbor=new VQP(midarc, midradius);
 		    neighborList.add(newneighbor);
+		    visitedcircle_Queue.add(newneighbor);
+		    visitedcircle_Queueclone.add(newneighbor);
 		    uncoverArc=findUncoverarc(circle, neighborList);
+		    uncoversize=uncoverArc.entrySet().size();
+		    
+		    Circle aCircle = new Circle(midarc, midradius);
+			if (logger.isDebugEnabled() && PaintShapes.painting) {
+				PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
+				PaintShapes.paint.addCircle(aCircle);
+				PaintShapes.paint.myRepaint();
+			}
 		}
 		//calculate the cover radius
-		coverradius=calculateIncircle(circle.getCoordinate(), circle.getRadius(), visitedcircle_Queue);
-		if(coverradius<radius){
-			
+		coverradius=calculateIncircle(circle.getCoordinate(), visitedcircle_Queueclone);
+		while(coverradius<radius*key){
+			AQuery aquery1=new AQuery(levelstartPinHex, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
+			ResultSetD2 aresult1=query(aquery1);
+			countquery++;
+			queryset.addAll(aresult1.getPOIs());
+			double aradius=levelstartPinHex.distance(aresult1.getPOIs().get(aresult1.getPOIs().size()-1).getCoordinate());
+			visitedcircle_Queue.add(new VQP(levelstartPinHex, aradius));
+			visitedcircle_Queueclone.add(new VQP(levelstartPinHex, aradius));
+			 Circle aCircle1 = new Circle(levelstartPinHex, aradius);
+				if (logger.isDebugEnabled() && PaintShapes.painting) {
+					PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
+					PaintShapes.paint.addCircle(aCircle1);
+					PaintShapes.paint.myRepaint();
+				}
+			coverradius=calculateIncircle(circle.getCoordinate(), visitedcircle_Queueclone);
+			 
+		}
+		Circle aCircle2 = new Circle(circle.getCoordinate(), coverradius);
+		if (logger.isDebugEnabled() && PaintShapes.painting) {
+			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			PaintShapes.paint.addCircle(aCircle2);
+			PaintShapes.paint.myRepaint();
 		}
 		return coverradius;
 	}
@@ -360,7 +378,7 @@ public class Hexagon_Optimize6 extends Strategy {
 	/*
 	 * algorithm 1 To calculate the maximum inscribed circle of a given area
 	 */
-	public double calculateIncircle(Coordinate startPoint,double radius,Coordinate levelstartPoint,
+	public double calculateIncircle(Coordinate startPoint,
 			LinkedList<VQP> visitedcircle_Queue) {
 		Coordinate s=new Coordinate();
 		double minRadius = 1e308;
@@ -368,54 +386,67 @@ public class Hexagon_Optimize6 extends Strategy {
 			VQP circle1 = visitedcircle_Queue.get(i);
 			for (int j = i + 1; j < visitedcircle_Queue.size(); j++) {
 				VQP circle2 = visitedcircle_Queue.get(j);
-
 				double dr = circle1.getRadius() - circle2.getRadius();
-				// circle1 contain circle2, no need processing circle2
+				// circle1 contain circle2, no need processing circle
 				if (dr > 0 && circle_contain(circle1, circle2)) {
 					continue;
 				}
 				// circle2 contain circle1, no need processing circle1
-				else if (dr < 0 && circle_contain(circle2, circle1)) {
+				 if (dr < 0 && circle_contain(circle2, circle1)) {
 					break;
-				} else if (circles_Insecter(circle1, circle2)) {
+				} 
+				 if (circles_Insecter(circle1, circle2)) {
 					IntersectPoint inter = calculateIntersectPoint(circle1,
 							circle2);
-					double d1 = inter.getIntersectPoint_left().distance(
-							startPoint);
-					double d2 = inter.getIntersectPoint_right().distance(
-							startPoint);
-					Coordinate temP = new Coordinate();
-					if (d1 > d2)
-						temP = inter.getIntersectPoint_left();
-					else
-						temP = inter.getIntersectPoint_right();
-					// test if the temP is inside another circle
-					boolean in = false;
-					VQP firstcircle=new VQP(startPoint, radius);
-					if(isinCircle(temP, firstcircle))
-						in=true;
+				    boolean leftin=false;				
+					boolean rightin = false;
 					Iterator<VQP> it = visitedcircle_Queue.iterator();
-					while (it.hasNext() && !in) {
+					while (it.hasNext()&&!(leftin&&rightin)) {
 						VQP circle3 = it.next();
 						if (!circle1.getCoordinate().equals2D(
 								circle3.getCoordinate())
 								&& !circle2.getCoordinate().equals2D(
 										circle3.getCoordinate())) {
-							if (isinCircle(temP, circle3)) {
-								in = true;
+							if (!leftin&&isinCircle(inter.getIntersectPoint_left(), circle3)) {
+								leftin = true;																														
+							}
+							if(!rightin&&isinCircle(inter.getIntersectPoint_right(), circle3)){
+								rightin=true;
 							}
 						}
 					}
-					if (!in) {
-						if(minRadius>temP.distance(startPoint)){
-						   s=temP;
+					
+					if(!leftin&&rightin){
+						double d1=startPoint.distance(inter.getIntersectPoint_left());
+						if(d1<minRadius){
+							s=inter.getIntersectPoint_left();
+							minRadius=d1;
 						}
-						minRadius = Math.min(minRadius,	temP.distance(startPoint));
 					}
-				}
+					if(leftin&&!rightin){
+						double d2=startPoint.distance(inter.getIntersectPoint_right());
+						if(d2<minRadius){
+							s=inter.getIntersectPoint_right();
+							minRadius=d2;
+						}
+					}
+					if(!leftin&&!rightin){
+						double d3=startPoint.distance(inter.getIntersectPoint_left());
+						double d4=startPoint.distance(inter.getIntersectPoint_right());
+						if(d3<d4&&d3<minRadius){
+							s=inter.getIntersectPoint_left();
+							minRadius=d3;
+						}
+						if(d4<d3&&d4<minRadius){
+							s=inter.getIntersectPoint_right();
+							minRadius=d4;
+						}
+					}
+				  }
+				
 			}
 		}
-		levelstartPoint=s;
+		levelstartPinHex=s;
 		return minRadius;
 	}
 

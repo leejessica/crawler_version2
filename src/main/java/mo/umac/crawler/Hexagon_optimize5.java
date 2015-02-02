@@ -37,7 +37,7 @@ public class Hexagon_optimize5 extends Strategy {
 	 * 
 	 */
 	// public static int recursion = 1;
-	public static int NEED_POINTS_NUMBER = 2589;
+	public static int NEED_POINTS_NUMBER = 100;
 	public static int countPoint = 0;
 	public static double sqrt3 = Math.sqrt(3);
 	public static double key = 0.97;
@@ -51,12 +51,12 @@ public class Hexagon_optimize5 extends Strategy {
 	private static Set<VQP> visitedcircle_Queue = new HashSet<VQP>();
 
 	public Hexagon_optimize5() {
-		startPoint.x = -73.355835;
-		startPoint.y = 42.746632;
-//		 startPoint.x=500;
-//		 startPoint.y= 500;
+//		startPoint.x = -73.355835;
+//		startPoint.y = 42.746632;
+		 startPoint.x=500;
+		 startPoint.y= 500;
 
-		logger.info("------------HexagonCrawler2_Modify------------");
+		logger.info("------------quad tree------------");
 	}
 
 	@Override

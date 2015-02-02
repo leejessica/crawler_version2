@@ -51,6 +51,7 @@ public class Hexagon_optimize4 extends Strategy {
 	// the visited points
 	private static Set<VQP> visitedcircle_Queue = new HashSet<VQP>();
 
+
 	public Hexagon_optimize4() {
 //		startPoint.x = -73.355835;
 //		startPoint.y = 42.746632;

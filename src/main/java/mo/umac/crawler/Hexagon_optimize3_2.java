@@ -26,12 +26,13 @@ import com.vividsolutions.jts.geom.Envelope;
 /**
  * @author Jessica
  * 
- * This algorithm recursive partition the rectangle into 2 equal parts
+ * This algorithm recursive partition the rectangle into two equal parts
  *  to cover a regular rectangle which is the minimum regular rectangle 
- *  of the uncovred hexagon
+ *  of the uncovred hexagon, needQuery function also will be called when
+ *  query in hexagon in order to test whether a query is need or not
  * 
  */
-public class Hexagon_optimize2 extends Strategy {
+public class Hexagon_optimize3_2 extends Strategy {
 
 	/**
 	 * 
@@ -48,16 +49,15 @@ public class Hexagon_optimize2 extends Strategy {
 	private static Set<APOI> eligibleset = new HashSet<APOI>();
 	// @param visitedcircle_Queue: record the information(coordinate,radius)of
 	// the visited points
-	private static LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
-	private static LinkedList<VQP>visitedcircle_Queueclone=new LinkedList<VQP>();
+	private static Set<VQP> visitedcircle_Queue = new HashSet<VQP>();
 
-	public Hexagon_optimize2() {
+	public Hexagon_optimize3_2() {
 //		startPoint.x = -73.355835;
 //		startPoint.y = 42.746632;
 		 startPoint.x=500;
 		 startPoint.y= 500;
 
-		logger.info("------------rectangle cover------------");
+		logger.info("------------HexagonCrawler2_Modify------------");
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class Hexagon_optimize2 extends Strategy {
 
 	/* calculate the centeral points of the hexagons */
 	public void calculatePoint(Coordinate startPoint, double radius,
-			LinkedList<VQP> visitedcircle_Queue, LinkedList<Coordinate> unvisited_Queue) {
+			Set<VQP> visitedcircle_Queue, LinkedList<Coordinate> unvisited_Queue) {
 		Coordinate[] d = new Coordinate[6];
 		for (int i = 0; i < d.length; i++) {
 			d[i] = new Coordinate();
@@ -116,7 +116,7 @@ public class Hexagon_optimize2 extends Strategy {
 		return flag;
 	}
 
-	private boolean myContain2(LinkedList<VQP> q, Coordinate c) {
+	private boolean myContain2(Set<VQP> q, Coordinate c) {
 		boolean flag = false;
 		Iterator<VQP> it = q.iterator();
 		while (it.hasNext()) {
@@ -143,6 +143,7 @@ public class Hexagon_optimize2 extends Strategy {
 	public void ununiformlyquery(Coordinate startPoint, Envelope envelopeState,
 			String state, int category, String query) {
 		// record points for next round query
+		LinkedList<VQP> visited_Queue = new LinkedList<VQP>();
 		LinkedList<Coordinate> unvisited_Queue = new LinkedList<Coordinate>();
 		/* issue the first query */
 		AQuery Firstquery = new AQuery(startPoint, state, category, query,
@@ -156,7 +157,6 @@ public class Hexagon_optimize2 extends Strategy {
 		Coordinate farthestCoordinate = farthest.getCoordinate();
 		double distance = startPoint.distance(farthestCoordinate);
 		visitedcircle_Queue.add(new VQP(startPoint, distance));
-		visitedcircle_Queueclone.add(new VQP(startPoint, distance));
 		//
 		Circle aCircle = new Circle(startPoint, distance);
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -169,7 +169,6 @@ public class Hexagon_optimize2 extends Strategy {
 		/* compute coordinates of the points which are used to next round query */
 		calculatePoint(startPoint, radius, visitedcircle_Queue, unvisited_Queue);
 		int level = 1;
-		LinkedList<VQP>lowcirclelist=new LinkedList<VQP>();
 		while (countPoint < NEED_POINTS_NUMBER) {
 			for (int i = 1; i <= level * 6; i++) {
 				if (!unvisited_Queue.isEmpty()) {
@@ -197,10 +196,10 @@ public class Hexagon_optimize2 extends Strategy {
 						 * futher reduce the query cost
 						 */
 						visitedcircle_Queue.add(new VQP(p, crawl_radius));
-						visitedcircle_Queueclone.add(new VQP(p, crawl_radius));
 						// query in the hexagon
 						if (crawl_radius < radius * key) {
-							lowcirclelist.add(new VQP(p, crawl_radius));
+							crawl_radius = queryInHexagon(p, envelopeState,
+									radius, state, category, query);
 						}
 						Circle aaCircle = new Circle(p, crawl_radius);
 						if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -208,26 +207,27 @@ public class Hexagon_optimize2 extends Strategy {
 							PaintShapes.paint.addCircle(aaCircle);
 							PaintShapes.paint.myRepaint();
 						}
+						// denote the Hexagon has been covered
+						VQP visitedPoint = new VQP(p, crawl_radius);
+						visited_Queue.addLast(visitedPoint);
 					}
 					/* no need to query! */
 					else {
 						visitedcircle_Queue.add(new VQP(p, 0));
-					    visitedcircle_Queueclone.add(c);
+						visited_Queue.addLast(c);
 					}
 				}
 			}
-			//cover the hexagon
-			for(int index=0;index<lowcirclelist.size();index++){
-				VQP lowcircle=lowcirclelist.get(index);
-				double lowradius=calculateIncircle(lowcircle.getCoordinate(), visitedcircle_Queueclone);
-				if(lowradius<key*radius){
-					queryInHexagon(lowcircle.getCoordinate(), envelopeState, radius, state, category, query);
-				}
-			}
-		    lowcirclelist.clear();
 			/* calculate the cover radius */
-			double coverRadius = calculateIncircle(startPoint, visitedcircle_Queueclone);
-			
+			double coverRadius = calculateIncircle(startPoint, visited_Queue);
+			visited_Queue.clear();
+			Circle circle = new Circle(startPoint, coverRadius);
+			if (logger.isDebugEnabled() && PaintShapes.painting) {
+				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+				PaintShapes.paint.addCircle(circle);
+				PaintShapes.paint.myRepaint();
+			}
+
 			// compute the number of eligible point
 			Iterator<APOI> it = queryset.iterator();
 			while (it.hasNext()) {
@@ -255,28 +255,21 @@ public class Hexagon_optimize2 extends Strategy {
 	 */
 	public double queryInHexagon(Coordinate point, Envelope envelopeState,
 			double radius, String state, int category, String query) {
-		
+		LinkedList<VQP> visited_Queue = new LinkedList<VQP>();
 		// initial the rectangle
 		double R = radius * key;
 		Envelope envelope = new Envelope(point.x - R, point.x + R, point.y - R, point.y + R );
-		coverRectangle(envelope, envelopeState, state, category, query
-				/*visited_Queue*/);
+		coverRectangle(envelope, envelopeState, state, category, query,
+				visited_Queue);
 		// calculate the coverradius
-		double coverradius = calculateIncircle(point, visitedcircle_Queueclone);
-		
-		Circle circle = new Circle(point, coverradius);
-		if (logger.isDebugEnabled() && PaintShapes.painting) {
-			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			PaintShapes.paint.addCircle(circle);
-			PaintShapes.paint.myRepaint();
-		}
-		
-		return coverradius;
+		double coverraidus = calculateIncircle(point, visited_Queue);
+		visited_Queue.clear();
+		return coverraidus;
 	}
 
 	public void coverRectangle(Envelope envelope, Envelope envelopeState,
-			String state, int category, String query
-			/*LinkedList<VQP> visited_Queue*/) {
+			String state, int category, String query,
+			LinkedList<VQP> visited_Queue) {
 
 		Envelope e[] = partitionEnvelope(envelope);
 		for (int i = 0; i < 2; i++) {
@@ -286,7 +279,8 @@ public class Hexagon_optimize2 extends Strategy {
 			p1.y = (e[i].getMinY() + e[i].getMaxY()) / 2;
 			Coordinate p2 = new Coordinate(e[i].getMinX(), e[i].getMinY());
 			double needradius = p1.distance(p2);
-			if (e[i].intersects(envelopeState)) {
+			VQP vqp=new VQP(p1, needradius);
+			if (needQuery(vqp, visitedcircle_Queue, envelopeState)) {
 				AQuery Firstquery = new AQuery(p1, state, category, query,
 						MAX_TOTAL_RESULTS_RETURNED);
 				ResultSetD2 resultSetStart = query(Firstquery);
@@ -296,25 +290,14 @@ public class Hexagon_optimize2 extends Strategy {
 				APOI farthest = resultSetStart.getPOIs().get(size - 1);
 				double radius = p1.distance(farthest.getCoordinate());
 				visitedcircle_Queue.add(new VQP(p1, radius));
-                visitedcircle_Queueclone.add(new VQP(p1, radius));
-                
-                Circle circle = new Circle(p1, radius);
-    			if (logger.isDebugEnabled() && PaintShapes.painting) {
-    				PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
-    				PaintShapes.paint.addCircle(circle);
-    				PaintShapes.paint.myRepaint();
-    			}
-                
+				visited_Queue.add(new VQP(p1, radius));
 				if (needradius > radius) {
-					coverRectangle(e[i], envelopeState, state, category, query
-							/*visited_Queue*/);
-				} /*else
-					visited_Queue.add(new VQP(p1, radius));*/
-			}
-			//e[i] is out of the data space, no need query
-			else {
+					coverRectangle(e[i], envelopeState, state, category, query,
+							visited_Queue);
+				} 					
+			} else {
 				visitedcircle_Queue.add(new VQP(p1, 0));
-				visitedcircle_Queueclone.add(new VQP(p1, needradius));
+				visited_Queue.add(new VQP(p1, needradius));
 			}
 		}
 	}
@@ -323,7 +306,7 @@ public class Hexagon_optimize2 extends Strategy {
 		Envelope[] e = new Envelope[2];
 		double width = envelop.getWidth();// maxX-minX
 		double height = envelop.getHeight();
-		if (width >= height) {
+		if (width > height) {
 			double midX = (envelop.getMaxX() + envelop.getMinX()) / 2;
 			e[0] = new Envelope(envelop.getMinX(), midX, envelop.getMinY(),
 					envelop.getMaxY());
@@ -342,130 +325,57 @@ public class Hexagon_optimize2 extends Strategy {
 	/*
 	 * algorithm 1 To calculate the maximum inscribed circle of a given area
 	 */
-//	public double calculateIncircle(Coordinate startPoint,
-//			LinkedList<VQP> visitedcircle_Queue) {
-//		double minRadius = 1e308;
-//		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {
-//			VQP circle1 = visitedcircle_Queue.get(i);
-//			for (int j = i + 1; j < visitedcircle_Queue.size(); j++) {
-//				VQP circle2 = visitedcircle_Queue.get(j);
-//
-//				double dr = circle1.getRadius() - circle2.getRadius();
-//				// circle1 contain circle2, no need processing circle2
-//				if (dr > 0 && circle_contain(circle1, circle2)) {
-//					continue;
-//				}
-//				// circle2 contain circle1, no need processing circle1
-//				else if (dr < 0 && circle_contain(circle2, circle1)) {
-//					break;
-//				} else if (circles_Insecter(circle1, circle2)) {
-//					IntersectPoint inter = calculateIntersectPoint(circle1,
-//							circle2);
-//					double d1 = inter.getIntersectPoint_left().distance(
-//							startPoint);
-//					double d2 = inter.getIntersectPoint_right().distance(
-//							startPoint);
-//					Coordinate temP = new Coordinate();
-//					if (d1 > d2)
-//						temP = inter.getIntersectPoint_left();
-//					else
-//						temP = inter.getIntersectPoint_right();
-//					// test if the temP is inside another circle
-//					boolean in = false;
-//					Iterator<VQP> it = visitedcircle_Queue.iterator();
-//					while (it.hasNext() && !in) {
-//						VQP circle3 = it.next();
-//						if (!circle1.getCoordinate().equals2D(
-//								circle3.getCoordinate())
-//								&& !circle2.getCoordinate().equals2D(
-//										circle3.getCoordinate())) {
-//							if (isinCircle(temP, circle3)) {
-//								in = true;
-//							}
-//						}
-//					}
-//					if (!in) {
-//						minRadius = Math.min(minRadius,
-//								temP.distance(startPoint));
-//					}
-//				}
-//			}
-//		}
-//		return minRadius;
-//	}
-	
 	public double calculateIncircle(Coordinate startPoint,
 			LinkedList<VQP> visitedcircle_Queue) {
-	//	Coordinate s=new Coordinate();
 		double minRadius = 1e308;
-		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {			
+		for (int i = 0; i < visitedcircle_Queue.size() - 1; i++) {
 			VQP circle1 = visitedcircle_Queue.get(i);
 			for (int j = i + 1; j < visitedcircle_Queue.size(); j++) {
 				VQP circle2 = visitedcircle_Queue.get(j);
+
 				double dr = circle1.getRadius() - circle2.getRadius();
-				// circle1 contain circle2, no need processing circle
+				// circle1 contain circle2, no need processing circle2
 				if (dr > 0 && circle_contain(circle1, circle2)) {
 					continue;
 				}
 				// circle2 contain circle1, no need processing circle1
-				 if (dr < 0 && circle_contain(circle2, circle1)) {
-					
+				else if (dr < 0 && circle_contain(circle2, circle1)) {
 					break;
-				} 
-				 if (circles_Insecter(circle1, circle2)) {
+				} else if (circles_Insecter(circle1, circle2)) {
 					IntersectPoint inter = calculateIntersectPoint(circle1,
 							circle2);
-				    boolean leftin=false;				
-					boolean rightin = false;
-			
+					double d1 = inter.getIntersectPoint_left().distance(
+							startPoint);
+					double d2 = inter.getIntersectPoint_right().distance(
+							startPoint);
+					Coordinate temP = new Coordinate();
+					if (d1 > d2)
+						temP = inter.getIntersectPoint_left();
+					else
+						temP = inter.getIntersectPoint_right();
+					// test if the temP is inside another circle
+					boolean in = false;
 					Iterator<VQP> it = visitedcircle_Queue.iterator();
-					while (it.hasNext()&&!(leftin&&rightin)) {
+					while (it.hasNext() && !in) {
 						VQP circle3 = it.next();
 						if (!circle1.getCoordinate().equals2D(
 								circle3.getCoordinate())
 								&& !circle2.getCoordinate().equals2D(
 										circle3.getCoordinate())) {
-							if (isinCircle(inter.getIntersectPoint_left(), circle3)) {
-								leftin = true;																															
-							}
-							if(isinCircle(inter.getIntersectPoint_right(), circle3)){
-								rightin=true;
+							if (isinCircle(temP, circle3)) {
+								in = true;
 							}
 						}
 					}
-					
-					if(!leftin&&rightin){
-						double d1=startPoint.distance(inter.getIntersectPoint_left());
-						if(d1<minRadius){
-						//	s=inter.getIntersectPoint_left();
-							minRadius=d1;
-						}
+					if (!in) {
+						minRadius = Math.min(minRadius,
+								temP.distance(startPoint));
 					}
-					if(leftin&&!rightin){
-						double d2=startPoint.distance(inter.getIntersectPoint_right());
-						if(d2<minRadius){
-						//	s=inter.getIntersectPoint_right();
-							minRadius=d2;
-						}
-					}
-					if(!leftin&&!rightin){
-						double d3=startPoint.distance(inter.getIntersectPoint_left());
-						double d4=startPoint.distance(inter.getIntersectPoint_right());
-						if(d3<d4&&d3<minRadius){
-						//	s=inter.getIntersectPoint_left();
-							minRadius=d3;
-						}
-						if(d4<d3&&d4<minRadius){
-						//	s=inter.getIntersectPoint_right();
-							minRadius=d4;
-						}
-					}
-				  }
+				}
 			}
 		}
 		return minRadius;
 	}
-
 
 	/* calculate the intersecting points of two circle */
 	public IntersectPoint calculateIntersectPoint(VQP circle1, VQP circle2) {
@@ -536,7 +446,7 @@ public class Hexagon_optimize2 extends Strategy {
 	 * @param visitedcircle_Queue: record the information of all the visited
 	 * points through out the whole period of running this algorithm
 	 */
-	public boolean needQuery(VQP circle, LinkedList<VQP> visitedcircle_Queue,
+	public boolean needQuery(VQP circle, Set<VQP> visitedcircle_Queue,
 			Envelope envelopeState) {
 		boolean needquery = false;
 		if (!outspace(circle, envelopeState)) {
@@ -804,7 +714,7 @@ public class Hexagon_optimize2 extends Strategy {
 		} else
 			return false;
 	}
-
+	
 	public Coordinate[] line_circle_intersect(VQP circle,Coordinate p){
 		Coordinate startPoint=circle.getCoordinate();
 		double radius=circle.getRadius();
@@ -835,6 +745,7 @@ public class Hexagon_optimize2 extends Strategy {
 		 }
 		 return a;
 	}
+
 	// To test whether point p1 equals to point p2
 	public boolean pointsequal(Coordinate p1, Coordinate p2) {
 		if (Math.abs(p1.x - p2.x) < 1e-6 && Math.abs(p1.y - p2.y) < 1e-6)

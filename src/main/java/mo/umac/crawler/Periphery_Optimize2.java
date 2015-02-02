@@ -29,7 +29,7 @@ public class Periphery_Optimize2 extends Strategy{
 	//private Coordinate startPoint=new Coordinate();
 	
 	public static int countquery=0;
-	public static int NEED_POINTS_NUM=100;
+	public static int NEED_POINTS_NUM=57584;
 	public static int countPoint=0;
 	public static int level=0;
 	public static Coordinate startPoint=new Coordinate();
@@ -46,10 +46,10 @@ public class Periphery_Optimize2 extends Strategy{
 	
 	public Periphery_Optimize2() {
 		//super();
-//		startPoint.x = -73.355835;
-//		startPoint.y = 42.746632;
-		 startPoint.x=500;
-		 startPoint.y= 500;
+		startPoint.x = -73.355835;
+		startPoint.y = 42.746632;
+//		 startPoint.x=500;
+//		 startPoint.y= 500;
 		logger.info("------------PeripheryQuery------------");
 	}
 	// public PeripheryQuery(Coordinate a){
@@ -133,6 +133,10 @@ public class Periphery_Optimize2 extends Strategy{
     			PaintShapes.paint.addCircle(aaCircle);
     			PaintShapes.paint.myRepaint();
     		}
+    		if (countPoint == Strategy.TOTAL_POINTS) {
+				logger.info("We can only find " + TOTAL_POINTS + "points!");
+				break;
+			}
     		
         }
         
@@ -521,7 +525,7 @@ public class Periphery_Optimize2 extends Strategy{
 					boolean rightin = false;
 			
 					Iterator<VQP> it = visitedcircle_Queue.iterator();
-					while (it.hasNext()) {
+					while (it.hasNext()&&!(leftin&&rightin)) {
 						VQP circle3 = it.next();
 						if (!circle1.getCoordinate().equals2D(
 								circle3.getCoordinate())
@@ -546,7 +550,7 @@ public class Periphery_Optimize2 extends Strategy{
 					if(leftin&&!rightin){
 						double d2=startPoint.distance(inter.getIntersectPoint_right());
 						if(d2<minRadius){
-							s=inter.getIntersectPoint_left();
+							s=inter.getIntersectPoint_right();
 							minRadius=d2;
 						}
 					}
@@ -558,7 +562,7 @@ public class Periphery_Optimize2 extends Strategy{
 							minRadius=d3;
 						}
 						if(d4<d3&&d4<minRadius){
-							s=inter.getIntersectPoint_left();
+							s=inter.getIntersectPoint_right();
 							minRadius=d4;
 						}
 					}

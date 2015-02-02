@@ -14,10 +14,17 @@ import java.util.Set;
 
 import mo.umac.crawler.AlgoSlice;
 import mo.umac.crawler.Hexagon;
+import mo.umac.crawler.Hexagon_Optimize6;
 import mo.umac.crawler.Hexagon_optimize;
 import mo.umac.crawler.Hexagon_optimize2;
+import mo.umac.crawler.Hexagon_optimize2_2;
 import mo.umac.crawler.Hexagon_optimize3;
+import mo.umac.crawler.Hexagon_optimize3_2;
 import mo.umac.crawler.Hexagon_optimize4;
+import mo.umac.crawler.Hexagon_optimize4_2;
+import mo.umac.crawler.Hexagon_optimize5;
+import mo.umac.crawler.Hexagon_optimize5_2;
+import mo.umac.crawler.Hexagon_optimize_2;
 import mo.umac.crawler.MainYahoo;
 import mo.umac.crawler.Periphery_Optimize;
 import mo.umac.crawler.Periphery_Optimize2;
@@ -51,7 +58,8 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		DOMConfigurator.configure(MainYahoo.LOG_PROPERTY_PATH);
 		CrawlerTest test = new CrawlerTest();
 		PaintShapes.painting = true;
-		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
+		if(PaintShapes.painting){
+		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);}
 		//Coordinate startPoint=new Coordinate();
 		test.calling();
 
@@ -70,11 +78,18 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		//Binary_wholeSpace crawler=new Binary_wholeSpace();
 		//PeripheryQuery crawler=new PeripheryQuery();
 //		Periphery_Optimize crawler=new Periphery_Optimize();
-	    Periphery_Optimize2 crawler=new Periphery_Optimize2();	
+//	    Periphery_Optimize2 crawler=new Periphery_Optimize2();	
 //		Hexagon_optimize crawler=new Hexagon_optimize();
+//		Hexagon_optimize_2 crawler=new Hexagon_optimize_2();
 //		Hexagon_optimize2 crawler=new Hexagon_optimize2();
+//		Hexagon_optimize2_2 crawler=new Hexagon_optimize2_2();
 //		Hexagon_optimize4 crawler=new Hexagon_optimize4();
+//		Hexagon_optimize4_2 crawler=new Hexagon_optimize4_2();
+//		Hexagon_optimize3_2 crawler=new Hexagon_optimize3_2();
 //		Hexagon_optimize3 crawler=new Hexagon_optimize3();
+//		Hexagon_optimize5_2 crawler=new Hexagon_optimize5_2();
+//		Hexagon_optimize5 crawler=new Hexagon_optimize5();
+		Hexagon_Optimize6 crawler=new Hexagon_Optimize6();
 		
 		String state = "NY";
 		int categoryID = 96926236;
