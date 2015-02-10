@@ -39,6 +39,32 @@ public class ReadExcel {
         return keyList;		
 	}
 	
+	public ArrayList<Coordinate>getStartPoint(String filepath){
+	   ArrayList<Coordinate>startpointList=new ArrayList<Coordinate>(); 
+	   FileInputStream is=null;
+		try{
+		 is=new FileInputStream(filepath);}
+		catch (FileNotFoundException e){
+			e.printStackTrace();
+		}
+		HSSFWorkbook wb=null;
+		try{
+	      wb=new HSSFWorkbook(is);
+	      }catch (IOException e){
+	    	  e.printStackTrace();
+	      }
+		
+		HSSFSheet sheet=wb.getSheetAt(0);
+		int totalRows=sheet.getPhysicalNumberOfRows();
+		for(int i=1;i<totalRows;i++){
+			HSSFRow row=sheet.getRow(i);
+			Coordinate neednum=(int) row.getCell(0).getNumericCellValue();
+         //  System.out.println(key);
+			needpointList.add(neednum);
+		}
+		return startpointList;
+	}
+	
 	public static ArrayList<Integer> getNeedPoint(String filepath){
 		ArrayList<Integer>needpointList=new ArrayList<Integer>();
 		FileInputStream is=null;

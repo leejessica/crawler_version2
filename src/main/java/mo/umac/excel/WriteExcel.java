@@ -30,6 +30,30 @@ public class WriteExcel {
 		System.out.println("end ");
 	}
 
+	public void setStartPoint(String filepath){
+		HSSFWorkbook wb = new HSSFWorkbook();
+		HSSFSheet ws = wb.createSheet("keyvalue");
+		HSSFCellStyle style = wb.createCellStyle();
+		style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+		ws.setColumnWidth((short) 0, (short) 6500);
+		
+		System.out.println(keyList.size() + "===============");
+		HSSFRow row = ws.createRow(0);
+		HSSFCell cell = row.createCell(0);
+		cell.setCellValue("Coordinate.x");
+		cell.setCellStyle(style);
+		HSSFCell cell1 = row.createCell(1);
+		cell1.setCellValue("Coordinate.y");
+		cell1.setCellStyle(style);
+		
+		try {
+			FileOutputStream fout = new FileOutputStream(filepath);
+			wb.write(fout);
+			fout.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	public void setKeylist(String filepath) {
 
 		HSSFWorkbook wb = new HSSFWorkbook();
