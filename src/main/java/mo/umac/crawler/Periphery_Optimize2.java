@@ -29,7 +29,7 @@ public class Periphery_Optimize2 extends Strategy{
 	//private Coordinate startPoint=new Coordinate();
 	
 	public static int countquery=0;
-	public static int NEED_POINTS_NUM=57584;
+	public static int NEED_POINTS_NUM=4000;
 	public static int countPoint=0;
 	public static int level=0;
 	public static Coordinate startPoint=new Coordinate();
@@ -46,8 +46,9 @@ public class Periphery_Optimize2 extends Strategy{
 	
 	public Periphery_Optimize2() {
 		//super();
-		startPoint.x = -73.355835;
-		startPoint.y = 42.746632;
+//		startPoint.x = -73.355835;
+//		startPoint.y = 42.746632;
+		startPoint=new Coordinate(-74.124299, 41.322171);
 //		 startPoint.x=500;
 //		 startPoint.y= 500;
 		logger.info("------------PeripheryQuery------------");
@@ -105,6 +106,9 @@ public class Periphery_Optimize2 extends Strategy{
             logger.info("countPoint="+countPoint+"  countquery="+countquery);
         }
         while(countPoint<NEED_POINTS_NUM){
+        	if(countquery==49)
+        		logger.info("==============================/neligiblepoints="+countPoint+"/n=====================");
+
         	AQuery continuequery=new AQuery(levelstartPoint, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
         	ResultSetD2 continueresult=query(continuequery);
         	queryset.addAll(continueresult.getPOIs());

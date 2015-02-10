@@ -185,34 +185,38 @@ public class FunctionTest extends Strategy {
 			
 		
 		/***************new test*************************************/
-		Coordinate startPoint=new Coordinate(500, 500);
-		LinkedList<VQP>visitedcircle_Queue=new LinkedList<VQP>();
-		visitedcircle_Queue.add(new VQP(new Coordinate(500, 500), 45));
-		visitedcircle_Queue.add(new VQP(new Coordinate(589, 540), 67));
-		visitedcircle_Queue.add(new VQP(new Coordinate(500, 550), 95));
-		visitedcircle_Queue.add(new VQP(new Coordinate(439, 560), 124));
-		visitedcircle_Queue.add(new VQP(new Coordinate(460, 478), 69));
-		visitedcircle_Queue.add(new VQP(new Coordinate(580, 580), 70));
-		Iterator<VQP>testiterator=visitedcircle_Queue.iterator();
-		while(testiterator.hasNext()){
-			VQP m1=testiterator.next();
-			Circle tm=new Circle(m1.getCoordinate(), m1.getRadius());
-			if (PaintShapes.painting && logger.isDebugEnabled()) {
-				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-				PaintShapes.paint.addCircle(tm);
-				PaintShapes.paint.myRepaint();
-			}
-			
-		}
-		double coverradius=calculateIncircle(startPoint, visitedcircle_Queue);
-		Circle incircle=new Circle(startPoint, coverradius);
-		if (PaintShapes.painting && logger.isDebugEnabled()) {
-			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-			PaintShapes.paint.addCircle(incircle);
-			PaintShapes.paint.myRepaint();
-		}
-		/***************end test*************************************/
-		
+//		Coordinate startPoint=new Coordinate(500, 500);
+//		LinkedList<VQP>visitedcircle_Queue=new LinkedList<VQP>();
+//		visitedcircle_Queue.add(new VQP(new Coordinate(500, 500), 45));
+//		visitedcircle_Queue.add(new VQP(new Coordinate(589, 540), 67));
+//		visitedcircle_Queue.add(new VQP(new Coordinate(500, 550), 95));
+//		visitedcircle_Queue.add(new VQP(new Coordinate(439, 560), 124));
+//		visitedcircle_Queue.add(new VQP(new Coordinate(460, 478), 69));
+//		visitedcircle_Queue.add(new VQP(new Coordinate(580, 580), 70));
+//		Iterator<VQP>testiterator=visitedcircle_Queue.iterator();
+//		while(testiterator.hasNext()){
+//			VQP m1=testiterator.next();
+//			Circle tm=new Circle(m1.getCoordinate(), m1.getRadius());
+//			if (PaintShapes.painting && logger.isDebugEnabled()) {
+//				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+//				PaintShapes.paint.addCircle(tm);
+//				PaintShapes.paint.myRepaint();
+//			}
+//			
+//		}
+//		double coverradius=calculateIncircle(startPoint, visitedcircle_Queue);
+//		Circle incircle=new Circle(startPoint, coverradius);
+//		if (PaintShapes.painting && logger.isDebugEnabled()) {
+//			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+//			PaintShapes.paint.addCircle(incircle);
+//			PaintShapes.paint.myRepaint();
+//		}
+//		/***************end test*************************************/
+		Envelope envelope = new Envelope(-79.76259, -71.777491,
+				40.477399, 45.015865);
+		double area=envelope.getArea();
+		double density=57584/area;
+		System.out.println("density="+density);
 		System.out.println("end calling!");
 	}
 

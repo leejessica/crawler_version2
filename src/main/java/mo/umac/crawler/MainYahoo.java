@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import mo.umac.db.DBInMemory;
+import mo.umac.excel.ReadExcel;
 import mo.umac.metadata.APOI;
 import mo.umac.uscensus.Cluster;
 import mo.umac.uscensus.USDensity;
@@ -85,30 +86,51 @@ public class MainYahoo {
 		// testingUTOK();
 		// debuggingTestNY();
 		// nyPartition();
-		
-		
-		
+
 		Strategy.endData();
 	}
 
+	public int gettopK() {
+		return topK;
+	}
+
 	public static void testing() {
-		//Strategy crawlerStrategy = new AlgoPartition();
-//		Strategy crawlerStrategy=new AlgoSlice();
-//		Strategy crawlerStrategy=new Hexagon();
-//		Strategy crawlerStrategy=new Hexagon_optimize();
-//        Strategy crawlerStrategy=new Hexagon_optimize2();
-//		Strategy crawlerStrategy=new Hexagon_optimize3();
-//		Strategy crawlerStrategy=new Hexagon_optimize4();
-//		Strategy crawlerStrategy=new Hexagon_optimize5();
-//		Strategy crawlerStrategy=new Periphery_Optimize();
-		Strategy crawlerStrategy=new Periphery_Optimize2();
-//		Strategy crawlerStrategy=new Hexagon_Optimize6();
-//		Strategy crawlerStrategy=new AlgoSlice();
+		// Strategy crawlerStrategy = new AlgoPartition();
+		// Strategy crawlerStrategy=new AlgoSlice();
+		// Strategy crawlerStrategy=new Hexagon();
+		// Strategy crawlerStrategy=new Hexagon_optimize();
+		// Strategy crawlerStrategy=new Hexagon_optimize_2();
+		// Strategy crawlerStrategy=new Hexagon_optimize2();
+		// Strategy crawlerStrategy=new Hexagon_optimize3();
+		// Strategy crawlerStrategy=new Hexagon_optimize4();
+		// Strategy crawlerStrategy=new Hexagon_optimize4_2();
+		// Strategy crawlerStrategy=new Hexagon_optimize5();
+		// Strategy crawlerStrategy=new Periphery_Optimize();
+		// Strategy crawlerStrategy=new Periphery_Optimize2();
+
+		// Strategy crawlerStrategy=new AlgoSlice();
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
-		//AlgoPartition.mbrList.add(envelope);
-		Context crawlerContext = new Context(crawlerStrategy);
-		crawlerContext
-				.callCrawlingSingle(state, categoryID, category, envelope);
+		// AlgoPartition.mbrList.add(envelope);
+		String filepath = "../experiment_result/keylist.xls";
+		ReadExcel read = new ReadExcel();
+		ArrayList keyList = read.getkey(filepath);
+		String filepath2 = "../experiment_result/needpointList.xls";
+		ArrayList needpointList = read.getNeedPoint(filepath2);
+		
+		for (int j = 0; j < needpointList.size(); j++) {
+			int neednum=(Integer) needpointList.get(j);
+			Strategy crawlerStrategy = new Hexagon_Optimize6();
+			((Hexagon_Optimize6) crawlerStrategy).setNEED_POINTS_NUM(neednum);
+			String filepath1 = "../experiment_result/"+neednum+".xls";
+			for (int i = 0; i < keyList.size(); i++) {
+				double key = (Double) keyList.get(i);				
+				((Hexagon_Optimize6) crawlerStrategy).setkey(key);
+				((Hexagon_Optimize6) crawlerStrategy).setfilepath(filepath1);
+				Context crawlerContext = new Context(crawlerStrategy);
+				crawlerContext.callCrawlingSingle(state, categoryID, category,
+						envelope);
+			}
+		}
 	}
 
 	public static void nyPartition() {
@@ -292,7 +314,7 @@ public class MainYahoo {
 								granularityX, granularityY));
 					}
 
-					// 3. calling the algorithm					
+					// 3. calling the algorithm
 					AlgoPartition.mbrList = mbrsEnvelopes;
 					//
 					Context crawlerContext = new Context(crawlerStrategy);

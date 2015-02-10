@@ -3,6 +3,7 @@
  */
 package mo.umac.crawler;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.Set;
 import paint.PaintShapes;
 
 import mo.umac.db.DBInMemory;
+import mo.umac.excel.WriteExcel;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSetD2;
@@ -37,10 +39,11 @@ public class Hexagon_Optimize6 extends Strategy {
 	 * 
 	 */
 	// public static int recursion = 1;
-	public static int NEED_POINTS_NUMBER = 40000;
+	public static int NEED_POINTS_NUMBER =5500 ;
 	public static int countPoint = 0;
 	public static double sqrt3 = Math.sqrt(3);
-	public static double key = 0.95;
+	public static double key = 1;
+	public static double key2=3*sqrt3/(2*Math.PI);
 	public static int countquery = 0;
 
 	private static Coordinate startPoint = new Coordinate();
@@ -51,10 +54,10 @@ public class Hexagon_Optimize6 extends Strategy {
 	private static LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
 	private static LinkedList<VQP>visitedcircle_Queueclone=new LinkedList<VQP>();
 	private static Coordinate levelstartPinHex=new Coordinate();
-
+	private static String filepath1= "../experiment_result/result1.xls";
 	public Hexagon_Optimize6() {
-		startPoint.x = -73.355835;
-		startPoint.y = 42.746632;
+//		startPoint =new Coordinate (-73.355835, 42.746632);
+		startPoint=new Coordinate(-74.124299, 41.322171);
 //		 startPoint.x=500;
 //		 startPoint.y= 500;
 
@@ -74,12 +77,25 @@ public class Hexagon_Optimize6 extends Strategy {
 			return;
 		}
 		// Coordinate c = evenlopeState.centre();
-
+		
 		ununiformlyquery(startPoint, envelopeState, state, category, query);
-		logger.info("countquery"+countquery);
+		queryset.clear();
+		eligibleset.clear();
+		visitedcircle_Queueclone.clear();
+		visitedcircle_Queue.clear();
 		logger.info("eligiblepoint=" + countPoint);
 	}
-
+	
+	public void setkey(double a){
+		key=a;
+	}
+	
+	public void setNEED_POINTS_NUM(int a){
+		NEED_POINTS_NUMBER=a;
+	}
+	public void setfilepath(String filepath){
+		filepath1=filepath;
+	}
 	/* calculate the centeral points of the hexagons */
 	public void calculatePoint(Coordinate startPoint, double radius,
 			LinkedList<VQP> visitedcircle_Queue, LinkedList<Coordinate> unvisited_Queue) {
@@ -144,6 +160,8 @@ public class Hexagon_Optimize6 extends Strategy {
 	 */
 	public void ununiformlyquery(Coordinate startPoint, Envelope envelopeState,
 			String state, int category, String query) {
+		countPoint=0;
+		countquery=0;
 		// record points for next round query
 		LinkedList<Coordinate> unvisited_Queue = new LinkedList<Coordinate>();
 		LinkedList<VQP>lowCirclelist=new LinkedList<VQP>();
@@ -158,6 +176,14 @@ public class Hexagon_Optimize6 extends Strategy {
 		APOI farthest = resultSetStart.getPOIs().get(size - 1);
 		Coordinate farthestCoordinate = farthest.getCoordinate();
 		double distance = startPoint.distance(farthestCoordinate);
+		//
+		double area=Math.PI*distance*distance;
+		double density=100/area;
+		double pk=density/1588.9580739153143;
+		logger.info("density= "+density+"  pk= "+pk);
+		logger.info("------------------------");
+		
+		//
 		visitedcircle_Queue.add(new VQP(startPoint, distance));
 		visitedcircle_Queueclone.add(new VQP(startPoint, distance));
 		//
@@ -172,6 +198,11 @@ public class Hexagon_Optimize6 extends Strategy {
 		/* compute coordinates of the points which are used to next round query */
 		calculatePoint(startPoint, radius, visitedcircle_Queue, unvisited_Queue);
 		int level = 1;
+		MainYahoo mainyahoo=new MainYahoo();	
+		//
+		WriteExcel writer=new WriteExcel();
+	    writer.settabletitle(filepath1, 1588.95807391531, density, NEED_POINTS_NUMBER, mainyahoo.gettopK());
+		//
 		while (countPoint < NEED_POINTS_NUMBER) {
 			for (int i = 1; i <= level * 6; i++) {
 				if (!unvisited_Queue.isEmpty()) {
@@ -243,9 +274,30 @@ public class Hexagon_Optimize6 extends Strategy {
 				logger.info("We can only find " + TOTAL_POINTS + "points!");
 				break;
 			}
-
 			level++;
+//			if(NEED_POINTS_NUMBER-countPoint<level*6*mainyahoo.gettopK()*key2*key*key){
+//				while(countPoint<NEED_POINTS_NUMBER){
+//					AQuery aquery2=new AQuery(levelstartPinHex, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
+//					ResultSetD2 result2=query(aquery2);
+//					queryset.addAll(result2.getPOIs());
+//					countquery++;
+//					double radius2=levelstartPinHex.distance(result2.getPOIs().get(result2.getPOIs().size()-1).getCoordinate());
+//					visitedcircle_Queue.add(new VQP(levelstartPinHex, radius2));
+//					visitedcircle_Queueclone.add(new VQP(levelstartPinHex, radius2));
+//					coverRadius=calculateIncircle(startPoint, visitedcircle_Queueclone);
+//					Iterator<APOI> it1 = queryset.iterator();
+//					while (it1.hasNext()) {
+//						int id1 = it1.next().getId();
+//						APOI pp1 = DBInMemory.pois.get(id1);
+//						if (startPoint.distance(pp1.getCoordinate()) < coverRadius)
+//							eligibleset.add(pp1);
+//					}
+//					countPoint=eligibleset.size();
+//				}			
+//			}
+			logger.info("=======================================");
 		}
+		writer.setResult(filepath1, countPoint, queryset.size(), countquery, key);
 	}
 
 	public double queryInhexagon(VQP circle, double radius, String state, int category, String query){

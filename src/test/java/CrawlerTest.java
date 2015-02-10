@@ -1,5 +1,6 @@
 
 import java.sql.Connection;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -34,6 +35,8 @@ import mo.umac.db.H2DB;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.Rating;
 
+import org.apache.commons.math3.distribution.ExponentialDistribution;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import paint.PaintShapes;
@@ -59,8 +62,8 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		CrawlerTest test = new CrawlerTest();
 		PaintShapes.painting = true;
 		if(PaintShapes.painting){
-		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);}
-		//Coordinate startPoint=new Coordinate();
+		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
+		}
 		test.calling();
 
 	}
@@ -98,7 +101,7 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		String testSource = "../crawler-data/yahoolocal-h2/source";
 		String testTarget = "../crawler-data/yahoolocal-h2/target";
 		//
-		int numItems = 1000;
+		int numItems = 2000;
 		int topK = 10;
 		Strategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 		//
@@ -108,8 +111,10 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 		Strategy.dbExternal = new H2DB(testSource, testTarget);
 		// generate dataset
 		//List<Coordinate> points = generateSimpleCase(testSource, category, state, numItems);
-		//exportToH2(points, testSource, category, state);
-		//
+//		List<Coordinate>points=skewDataset(numItems);
+//		List<Coordinate>points=Exponentialdistribution(numItems);
+//		exportToH2(points, testSource, category, state);
+		//=============================================		
 		Strategy.dbInMemory = new DBInMemory();
 		DBInMemory.pois = readFromGeneratedDB(testSource);
 		//
@@ -149,17 +154,25 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 			logger.debug(id);
 		}
 
-		//logger.info("poisCrawledTimes:");
-		//Iterator it1 = Strategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
-		//while (it1.hasNext()) {
-		//	Entry entry = (Entry) it1.next();
-			//int poiID = (Integer) entry.getKey();
-			//int times = (Integer) entry.getValue();
-			//APOI aPOI = Strategy.dbInMemory.pois.get(poiID);
-			//double longitude = aPOI.getCoordinate().x;
-			//double latitude = aPOI.getCoordinate().y;
-			//logger.info(poiID + ": " + times + ", " + "[" + longitude + ", " + latitude + "]");
-	//	}
+	}
+	
+	public List<Coordinate>Exponentialdistribution(int n){
+		List<Coordinate>list=new ArrayList<Coordinate>();
+		ExponentialDistribution stat=new ExponentialDistribution(0.4);
+		Random random = new Random(System.currentTimeMillis());
+		double x=1.0;
+		double y=1.0;
+		for(int i=0;i<n;i++){
+			x=random.nextDouble();
+			y=stat.cumulativeProbability(x);
+			System.out.println("x="+x+"  y="+y);
+			x=Math.log(x*1000)+200;
+			y=Math.log(y+500)+500;
+			
+			Coordinate p=new Coordinate(x, y);
+			list.add(p);
+		}
+		return list;
 	}
 
 	/**
@@ -282,6 +295,70 @@ public class CrawlerTest extends Strategy/* extends SliceCrawler */{
 			e.printStackTrace();
 		}
 	}
+	
+	public static List<Coordinate> skewDataset(int n) {
+		double x = 1.0;
+		double y = 1.0;
+		double u1, u2;
+		double mean = 0.4;
+		double lamda = 1 / mean;
+		double minX = Double.MAX_VALUE;
+		double minY = Double.MAX_VALUE;
+		double maxX = Double.MIN_VALUE;
+		double maxY = Double.MIN_VALUE;
+		List<Coordinate> list = new ArrayList<Coordinate>();
+		Random random = new Random(System.currentTimeMillis());
+		Random r2 = new Random(System.currentTimeMillis());
+		// center
+		Coordinate center = new Coordinate(500, 500);
+		for (int i = 0; i < n; i++) {
+			u1 = random.nextDouble();
+			u2 = random.nextDouble();
+			boolean sign1 = r2.nextBoolean();
+			boolean sign2 = r2.nextBoolean();
+
+			x = (Math.log(1 - u1) / (-lamda));
+			y = (Math.log(1 - u2) / (-lamda));
+
+			if (x < minX) {
+				minX = x;
+			}
+			if (x > maxX) {
+				maxX = x;
+			}
+			if (y > maxY) {
+				maxY = y;
+			}
+			if (y < minY) {
+				minY = y;
+			}
+
+			if (!sign1) {
+				x *= -1;
+			}
+			if (!sign2) {
+				y *= -1;
+			}
+
+			Coordinate coordinate = new Coordinate(x, y);
+			list.add(coordinate);
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("boundary = " + minX + "," + maxX + ";" + minY + ","
+					+ maxY);
+		}
+		List<Coordinate> list2 = new ArrayList<Coordinate>();
+		for (int i = 0; i < n; i++) {
+			Coordinate coordinate = list.get(i);
+			x = (500 + coordinate.x / (maxX - minX) * 500) % 1000;
+			y = (500 + coordinate.y / (maxY - minY) * 500) % 1000;
+			Coordinate coordinate2 = new Coordinate(x, y);
+			list2.add(coordinate2);
+		}
+
+		return list2;
+	}
+
 
 	private void exportToH2(List<Coordinate> points, String testSource, String category, String state) {
 		HashMap<Integer, APOI> map = new HashMap<Integer, APOI>();
