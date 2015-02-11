@@ -116,21 +116,46 @@ public class MainYahoo {
 		ArrayList keyList = read.getkey(filepath);
 		String filepath2 = "../experiment_result/needpointList.xls";
 		ArrayList needpointList = read.getNeedPoint(filepath2);
+		String filepath3 = "../experiment_result/startpointList.xls";
+		ArrayList<Coordinate> startpointList = read.getStartPoint(filepath3);
+		//test Hexagon_optimize6
+//		for (int k = 0; k < startpointList.size(); k++) {
+//			Coordinate point=startpointList.get(k);
+//			Strategy crawlerStrategy = new Hexagon_Optimize6();
+//			((Hexagon_Optimize6) crawlerStrategy).setStartPoint(point);
+//			for (int j = 0; j < needpointList.size(); j++) {
+//				int neednum = (Integer) needpointList.get(j);
+//				((Hexagon_Optimize6) crawlerStrategy)
+//						.setNEED_POINTS_NUM(neednum);
+//				String filepath1 = "../experiment_result/recursive_periphery/" +point.x+"_"+neednum + ".xls";
+//				for (int i = 0; i < keyList.size(); i++) {
+//					double key = (Double) keyList.get(i);
+//					((Hexagon_Optimize6) crawlerStrategy).setkey(key);
+//					((Hexagon_Optimize6) crawlerStrategy)
+//							.setfilepath(filepath1);
+//					Context crawlerContext = new Context(crawlerStrategy);
+//					crawlerContext.callCrawlingSingle(state, categoryID,
+//							category, envelope);
+//				}
+//			}
+//		}
 		
-		for (int j = 0; j < needpointList.size(); j++) {
-			int neednum=(Integer) needpointList.get(j);
-			Strategy crawlerStrategy = new Hexagon_Optimize6();
-			((Hexagon_Optimize6) crawlerStrategy).setNEED_POINTS_NUM(neednum);
-			String filepath1 = "../experiment_result/"+neednum+".xls";
-			for (int i = 0; i < keyList.size(); i++) {
-				double key = (Double) keyList.get(i);				
-				((Hexagon_Optimize6) crawlerStrategy).setkey(key);
-				((Hexagon_Optimize6) crawlerStrategy).setfilepath(filepath1);
-				Context crawlerContext = new Context(crawlerStrategy);
-				crawlerContext.callCrawlingSingle(state, categoryID, category,
-						envelope);
+		//test Periphery_Optimize2
+		
+		for (int k = 0; k < startpointList.size(); k++) {
+			Coordinate point=startpointList.get(k);
+			String filepath1 = "../experiment_result/Periphery/peripheryresult_"+point.x+".xls";
+			Strategy crawlerStrategy = new Periphery_Optimize2();
+			((Periphery_Optimize2) crawlerStrategy).setStartPoint(point);
+			for (int j = 0; j < needpointList.size(); j++) {
+				int neednum = (Integer) needpointList.get(j);
+				((Periphery_Optimize2) crawlerStrategy).setNEED_POINTS_NUM(neednum);				
+				((Periphery_Optimize2) crawlerStrategy).setFilepath(filepath1);
+					Context crawlerContext = new Context(crawlerStrategy);
+					crawlerContext.callCrawlingSingle(state, categoryID,
+							category, envelope);
 			}
-		}
+		}		
 	}
 
 	public static void nyPartition() {

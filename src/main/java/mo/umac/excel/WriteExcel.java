@@ -20,31 +20,64 @@ public class WriteExcel {
 		String filepath = "../experiment_result/keylist.xls";
 		String filepath1 = "../experiment_result/result1.xls";
 		String filepath2 = "../experiment_result/needpointList.xls";
+		String filepath3 = "../experiment_result/startpointList.xls";
+		String filepath4="../experiment_result/recursive_periphery/-74.124299.xls";
+		ArrayList<String>filelist=new ArrayList<String>();
+		for(int i=0;i<13;i++){
+			String file="../experiment_result/recursive_periphery/-74.124299_"+(i+1)*500+".xls";
+			filelist.add(file);
+		}
+		we.combineResult(filepath3, filelist);
 		// we.setKeylist(filepath);
 //		for(int i=0;i<2;i++){
-//		we.settabletitle(filepath1, 10, 5, 100, 10);
-//		we.setResult(filepath1, 8, 15, 5, 0.97);
+//		we.settabletitle1(filepath1, 10, 5 );
+//		we.setResult1(filepath1, 8, 15, 5);
 //		}
 		// we.deleteRow(filepath1, 4);
-		we.setNeedpointNum(filepath2);
+		//we.setNeedpointNum(filepath2);
+//		we.setStartPoint(filepath3);
 		System.out.println("end ");
 	}
 
 	public void setStartPoint(String filepath){
 		HSSFWorkbook wb = new HSSFWorkbook();
-		HSSFSheet ws = wb.createSheet("keyvalue");
+		HSSFSheet ws = wb.createSheet();
 		HSSFCellStyle style = wb.createCellStyle();
 		style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
 		ws.setColumnWidth((short) 0, (short) 6500);
 		
-		System.out.println(keyList.size() + "===============");
 		HSSFRow row = ws.createRow(0);
 		HSSFCell cell = row.createCell(0);
 		cell.setCellValue("Coordinate.x");
 		cell.setCellStyle(style);
-		HSSFCell cell1 = row.createCell(1);
-		cell1.setCellValue("Coordinate.y");
-		cell1.setCellStyle(style);
+		HSSFCell cell_1 = row.createCell(1);
+		cell_1.setCellValue("Coordinate.y");
+		cell_1.setCellStyle(style);
+		
+		HSSFRow row1 = ws.createRow(1);
+		HSSFCell cell1 = row1.createCell(0);
+		cell1.setCellValue(-73.355835);
+		cell.setCellStyle(style);
+		HSSFCell cell1_1 = row1.createCell(1);
+		cell1_1.setCellValue(42.746632);
+		cell1_1.setCellStyle(style);
+		
+		HSSFRow row2 = ws.createRow(2);
+		HSSFCell cell2 = row2.createCell(0);
+		cell2.setCellValue(-73.974213);
+		cell2.setCellStyle(style);
+		HSSFCell cell2_1 = row2.createCell(1);
+		cell2_1.setCellValue(40.75768);
+		cell2_1.setCellStyle(style);
+		
+		HSSFRow row3 = ws.createRow(3);
+		HSSFCell cell3 = row3.createCell(0);
+		cell3.setCellValue(-74.124299);
+		cell3.setCellStyle(style);
+		HSSFCell cell3_1 = row3.createCell(1);
+		cell3_1.setCellValue(41.3221718);
+		cell3_1.setCellStyle(style);
+		
 		
 		try {
 			FileOutputStream fout = new FileOutputStream(filepath);
@@ -54,6 +87,7 @@ public class WriteExcel {
 			e.printStackTrace();
 		}
 	}
+	
 	public void setKeylist(String filepath) {
 
 		HSSFWorkbook wb = new HSSFWorkbook();
@@ -173,10 +207,10 @@ public class WriteExcel {
 				cell1.setCellValue("total crawled points");
 				cell1.setCellStyle(style);
 				HSSFCell cell2 = row.createCell(2);
-				cell2.setCellValue("cost");
+				cell2.setCellValue("key");
 				cell2.setCellStyle(style);
 				HSSFCell cell3 = row.createCell(3);
-				cell3.setCellValue("key");
+				cell3.setCellValue("cost");
 				cell3.setCellStyle(style);
 
 				FileOutputStream fout = new FileOutputStream(filepath);
@@ -187,7 +221,45 @@ public class WriteExcel {
 			}
 		}
 	}
+	
+	public void settabletitle1(String filepath) {
+		File file = new File(filepath);
+		if (file.length() == 0) {
+			try {
+				HSSFWorkbook wb = new HSSFWorkbook();
+				HSSFSheet ws = wb.createSheet();
+				HSSFCellStyle style = wb.createCellStyle();
+				style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+				for (int i = 0; i < 4; i++) {
+					ws.setColumnWidth((short) i, (short) 6500);
+				}
+				HSSFRow row1 = ws.createRow(0);
+				HSSFCell cell4 = row1.createCell(0);
+				cell4.setCellValue("Need Points");
+				cell4.setCellStyle(style);
+				HSSFCell cell5 = row1.createCell(1);
+				cell5.setCellValue("top-K");
+				cell5.setCellStyle(style);
+				HSSFCell cell6 = row1.createCell(2);
+				cell6.setCellValue("total crawled points");
+				cell6.setCellStyle(style);
+				HSSFCell cell7 = row1.createCell(3);
+				cell7.setCellValue("eligible points");
+				cell7.setCellStyle(style);
+				HSSFCell cell8 = row1.createCell(4);
+				cell8.setCellValue("cost");
+				cell8.setCellStyle(style);						
+				FileOutputStream fout = new FileOutputStream(filepath);
+				wb.write(fout);
+				fout.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
+  
+	
 	public void setResult(String filepath, double eligible, double queryset,
 			int cost, double key) {
 		try {
@@ -209,11 +281,102 @@ public class WriteExcel {
 			cell1.setCellValue(queryset);
 			cell1.setCellStyle(style);
 			HSSFCell cell2 = row.createCell(2);
-			cell2.setCellValue(cost);
+			cell2.setCellValue(key);
 			cell2.setCellStyle(style);
 			HSSFCell cell3 = row.createCell(3);
-			cell3.setCellValue(key);
+			cell3.setCellValue(cost);
 			cell3.setCellStyle(style);
+			FileOutputStream fout = new FileOutputStream(filepath);
+			wb.write(fout);
+			fout.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+	 public void combineResult(String filepath, ArrayList<String>filelist){
+		   try{		       	   
+			   FileInputStream fs = new FileInputStream(filepath);
+				POIFSFileSystem ps = new POIFSFileSystem(fs);
+				HSSFWorkbook wb = new HSSFWorkbook(ps);
+				HSSFSheet ws = wb.getSheetAt(0);
+				HSSFCellStyle style = wb.createCellStyle();
+				style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+				for (int j = 0; j < 5; j++) {
+					ws.setColumnWidth((short) j, (short) 6500);
+				}
+		        for(int i=0;i<filelist.size();i++){
+			   String filepath1=filelist.get(i);
+					FileInputStream fs1=new FileInputStream(filepath1);
+					POIFSFileSystem ps1=new POIFSFileSystem(fs1);
+					HSSFWorkbook wb1=new HSSFWorkbook(ps1);
+					HSSFSheet ws1=wb1.getSheetAt(0);
+					
+					HSSFRow row_1=ws1.getRow(0);
+					double needpoint=row_1.getCell(1).getNumericCellValue();
+					HSSFRow row_2=ws1.getRow(1);
+					double topk=row_2.getCell(1).getNumericCellValue();
+					HSSFRow row_3=ws1.getRow(3);
+					double eligible=row_3.getCell(0).getNumericCellValue();
+					double queryset=row_3.getCell(1).getNumericCellValue();
+					double cost=row_3.getCell(2).getNumericCellValue();
+					
+					int rowNum = ws.getLastRowNum();
+					HSSFRow row = ws.createRow(rowNum+1);
+					HSSFCell cell = row.createCell(0);
+					cell.setCellValue(needpoint);
+					cell.setCellStyle(style);
+					HSSFCell cell1 = row.createCell(1);
+					cell1.setCellValue(topk);
+					cell1.setCellStyle(style);
+					HSSFCell cell2 = row.createCell(2);
+					cell2.setCellValue(eligible);
+					cell2.setCellStyle(style);
+					HSSFCell cell3 = row.createCell(3);
+					cell3.setCellValue(queryset);
+					cell3.setCellStyle(style);
+					HSSFCell cell4 = row.createCell(4);
+					cell4.setCellValue(cost);
+					cell4.setCellStyle(style);
+					
+					FileOutputStream fout = new FileOutputStream(filepath);
+					wb.write(fout);
+					fout.close();
+		   }} catch (Exception e) {
+					e.printStackTrace();
+				}
+		   
+	   }
+	
+	public void setResult1(String filepath, int needNum, int topk,  double queryset,double eligible,
+			int cost) {
+		try {
+			FileInputStream fs = new FileInputStream(filepath);
+			POIFSFileSystem ps = new POIFSFileSystem(fs);
+			HSSFWorkbook wb = new HSSFWorkbook(ps);
+			HSSFSheet ws = wb.getSheetAt(0);
+			HSSFCellStyle style = wb.createCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+			for (int i = 0; i < 3; i++) {
+				ws.setColumnWidth((short) i, (short) 6500);
+			}
+			int rowNum = ws.getLastRowNum() + 1;
+			HSSFRow row = ws.createRow(rowNum);
+			HSSFCell cell = row.createCell(0);
+			cell.setCellValue(needNum);
+			cell.setCellStyle(style);
+			HSSFCell cell1 = row.createCell(1);
+			cell1.setCellValue(topk);
+			cell1.setCellStyle(style);
+			HSSFCell cell2 = row.createCell(2);
+			cell2.setCellValue(queryset);
+			cell2.setCellStyle(style);
+			HSSFCell cell3 = row.createCell(3);
+			cell3.setCellValue(eligible);
+			cell3.setCellStyle(style);
+			HSSFCell cell4 = row.createCell(4);
+			cell4.setCellValue(cost);
+			cell4.setCellStyle(style);
 			FileOutputStream fout = new FileOutputStream(filepath);
 			wb.write(fout);
 			fout.close();

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import mo.umac.db.DBInMemory;
+import mo.umac.excel.WriteExcel;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.plugins.IntersectPoint;
@@ -41,6 +42,8 @@ public class Periphery_Optimize2 extends Strategy{
 	private static LinkedList<VQP> visitedcircle_Queue=new LinkedList<VQP>();//record all the query circle
 	private static Coordinate levelstartPoint=new Coordinate();//record the start point of every level 
 	
+	private static String filepath=new String();
+	
 	private static double firstradius=0; 
 	
 	
@@ -71,11 +74,32 @@ public class Periphery_Optimize2 extends Strategy{
 		if (evenlopeState == null) {
 			return;
 		}		
-		startQuery(state, category, query);
+		startQuery(state, category, query);		
+		queryset.clear();
+		eligibleset.clear();
+		visitedcircle_Queue.clear();
 	    logger.info("eligiblepoint="+countPoint);		
 	}
 	
+	public void setStartPoint(Coordinate a){
+		startPoint=a;
+	}
+	
+	public void setNEED_POINTS_NUM(int a){
+		NEED_POINTS_NUM=a;
+	}
+	
+	public void setFilepath(String a){
+		filepath=a;
+	}
 	public void startQuery(String state, int category, String query){
+		//
+		countPoint=0;
+		countquery=0;
+		MainYahoo mainyahoo=new MainYahoo();
+		WriteExcel writer=new WriteExcel();
+		writer.settabletitle1(filepath);
+		//
 		//issue the first query
 		AQuery Firstquery = new AQuery(startPoint, state, category, query,
 				MAX_TOTAL_RESULTS_RETURNED);
@@ -105,10 +129,7 @@ public class Periphery_Optimize2 extends Strategy{
         	onelevelQuery(state, category, query, visited_Queue);
             logger.info("countPoint="+countPoint+"  countquery="+countquery);
         }
-        while(countPoint<NEED_POINTS_NUM){
-        	if(countquery==49)
-        		logger.info("==============================/neligiblepoints="+countPoint+"/n=====================");
-
+        while(countPoint<NEED_POINTS_NUM){       	
         	AQuery continuequery=new AQuery(levelstartPoint, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
         	ResultSetD2 continueresult=query(continuequery);
         	queryset.addAll(continueresult.getPOIs());
@@ -140,10 +161,9 @@ public class Periphery_Optimize2 extends Strategy{
     		if (countPoint == Strategy.TOTAL_POINTS) {
 				logger.info("We can only find " + TOTAL_POINTS + "points!");
 				break;
-			}
-    		
+			}   		
         }
-        
+        writer.setResult1(filepath, NEED_POINTS_NUM, mainyahoo.gettopK(), queryset.size(),countPoint, countquery);
 	}
 	
 	public void onelevelQuery(String state, int category, String query, LinkedList<VQP>visited_Queue){

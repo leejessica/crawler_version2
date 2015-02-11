@@ -86,6 +86,10 @@ public class Hexagon_Optimize6 extends Strategy {
 		logger.info("eligiblepoint=" + countPoint);
 	}
 	
+	public void setStartPoint(Coordinate a){
+		startPoint=a;
+	}
+	
 	public void setkey(double a){
 		key=a;
 	}
@@ -275,26 +279,26 @@ public class Hexagon_Optimize6 extends Strategy {
 				break;
 			}
 			level++;
-//			if(NEED_POINTS_NUMBER-countPoint<level*6*mainyahoo.gettopK()*key2*key*key){
-//				while(countPoint<NEED_POINTS_NUMBER){
-//					AQuery aquery2=new AQuery(levelstartPinHex, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
-//					ResultSetD2 result2=query(aquery2);
-//					queryset.addAll(result2.getPOIs());
-//					countquery++;
-//					double radius2=levelstartPinHex.distance(result2.getPOIs().get(result2.getPOIs().size()-1).getCoordinate());
-//					visitedcircle_Queue.add(new VQP(levelstartPinHex, radius2));
-//					visitedcircle_Queueclone.add(new VQP(levelstartPinHex, radius2));
-//					coverRadius=calculateIncircle(startPoint, visitedcircle_Queueclone);
-//					Iterator<APOI> it1 = queryset.iterator();
-//					while (it1.hasNext()) {
-//						int id1 = it1.next().getId();
-//						APOI pp1 = DBInMemory.pois.get(id1);
-//						if (startPoint.distance(pp1.getCoordinate()) < coverRadius)
-//							eligibleset.add(pp1);
-//					}
-//					countPoint=eligibleset.size();
-//				}			
-//			}
+			if(NEED_POINTS_NUMBER-countPoint<level*6*mainyahoo.gettopK()*key2*key*key){
+				while(countPoint<NEED_POINTS_NUMBER){
+					AQuery aquery2=new AQuery(levelstartPinHex, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
+					ResultSetD2 result2=query(aquery2);
+					queryset.addAll(result2.getPOIs());
+					countquery++;
+					double radius2=levelstartPinHex.distance(result2.getPOIs().get(result2.getPOIs().size()-1).getCoordinate());
+					visitedcircle_Queue.add(new VQP(levelstartPinHex, radius2));
+					visitedcircle_Queueclone.add(new VQP(levelstartPinHex, radius2));
+					coverRadius=calculateIncircle(startPoint, visitedcircle_Queueclone);
+					Iterator<APOI> it1 = queryset.iterator();
+					while (it1.hasNext()) {
+						int id1 = it1.next().getId();
+						APOI pp1 = DBInMemory.pois.get(id1);
+						if (startPoint.distance(pp1.getCoordinate()) < coverRadius)
+							eligibleset.add(pp1);
+					}
+					countPoint=eligibleset.size();
+				}			
+			}
 			logger.info("=======================================");
 		}
 		writer.setResult(filepath1, countPoint, queryset.size(), countquery, key);
